@@ -13,11 +13,11 @@ class ObstacleManager:
         collision_detected = False
         for obstacle in self.obstacles:
             obstacle.update()
-            if obstacle.get_rect(road).colliderect(player.get_rect()):
+            if obstacle.get_reduced_rect(road).colliderect(player.get_rect()):
                 collision_detected = True
 
         # Видалення перешкод
-        self.obstacles = [o for o in self.obstacles if o.depth > 0.2]
+        self.obstacles = [o for o in self.obstacles if o.depth > 0.3]
 
         # Генерація перешкод
         if random.random() < 0.01:
@@ -62,10 +62,25 @@ class Obstacle:
         Обчислює позицію і розмір перешкоди на основі перспективи.
         """
         lane_edges, y = road.get_lane_positions(self.depth)
-        width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8, 20)
+        width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8, 15)
         height = width / 2  # Пропорційна висота
         x = (lane_edges[self.lane] + lane_edges[self.lane + 1]) // 2
         return pygame.Rect(x - width // 2, y - height, width, height)
+
+    def get_reduced_rect(self, road):
+        """
+        Обчислення хітбоксу, меншого за візул
+        :param road:
+        :return:
+        """
+        rect = self.get_rect(road)
+        reduced_width = rect.width // 2
+        reduced_height = rect.height // 2
+        return pygame.Rect(
+            rect.x + rect.width // 4,
+            rect.y + rect.height // 4,
+            reduced_width, reduced_height
+        )
 
     def render(self, screen, road):
         """
@@ -73,3 +88,6 @@ class Obstacle:
         """
         rect = self.get_rect(road)
         pygame.draw.rect(screen, self.color, rect)
+        # Відмалювання хітбокса (Для тесту розкоментити)
+        reduced_rect = self.get_reduced_rect(road)
+        pygame.draw.rect(screen, (100, 199, 100), reduced_rect, 1)
