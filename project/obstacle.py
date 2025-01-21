@@ -20,7 +20,7 @@ class ObstacleManager:
         self.obstacles = [o for o in self.obstacles if o.depth > 0.2]
 
         # Генерація перешкод
-        if random.random() < 0.02:
+        if random.random() < 0.01:
             lane = random.randint(0, 2)
             self.obstacles.append(Obstacle(lane))
 
@@ -53,7 +53,7 @@ class Obstacle:
         """
         Оновлює глибину перешкоди для наближення.
         """
-        self.depth -= 0.008  # Чим ближче до гравця, тим менша глибина
+        self.depth -= 0.006  # Чим ближче до гравця, тим менша глибина
         if self.depth <= 0.1:
             self.depth = 0
 
@@ -73,4 +73,3 @@ class Obstacle:
         """
         rect = self.get_rect(road)
         pygame.draw.rect(screen, self.color, rect)
-

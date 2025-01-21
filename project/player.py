@@ -1,8 +1,6 @@
 import pygame
 
-
-def on_collision():
-    print("Game Over!")  # Виводимо повідомлення
+from project.constants import SCREEN_WIDTH
 
 
 class Player:
@@ -10,17 +8,17 @@ class Player:
     Клас автомобіля
     """
     def __init__(self):
-        self.x = 400  # Початкове положення по горизонталі
+        self.x = SCREEN_WIDTH // 2  # Початкове положення по горизонталі
         self.y = 500  # Початкове положення по вертикалі
         self.width = 120
         self.height = 60
         self.color = (255, 0, 0)  # Червоний автомобіль
-        self.speed = 0  # Початкова швидкість
+        self.speed = 10  # Початкова швидкість
         self.min_speed = 10
         self.max_speed = 400
-        self.move_speed = 5  # Швидкість руху вліво/вправо
+        self.move_speed = 10  # Швидкість руху вліво/вправо
         self.target_x = self.x  # Позиція, до якої автомобіль рухається
-        self.max_offset = 250  # Максимальна відстань, на яку можна відхилятися вліво чи вправо
+        self.max_offset = 250  # Максимальна відстань, на яку можна повернути
 
     def move_left(self):
         """
@@ -35,16 +33,8 @@ class Player:
         self.target_x = min(self.target_x + self.move_speed, 400 + self.max_offset)
 
     def update(self):
-        """
-        Оновлює позицію автомобіля, рухаючи його до цільової позиції.
-        """
         if abs(self.x - self.target_x) > self.move_speed:
-            if self.x < self.target_x:
-                self.x += self.move_speed
-            elif self.x > self.target_x:
-                self.x -= self.move_speed
-        else:
-            self.x = self.target_x
+            self.x += self.move_speed if self.x < self.target_x else -self.move_speed
 
     def render(self, screen):
         """

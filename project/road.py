@@ -2,6 +2,7 @@ import pygame
 
 
 class Road:
+
     def __init__(self):
         self.segments = [{"curve": 0} for _ in range(25)]
         self.offset = 0
@@ -76,7 +77,7 @@ class Road:
 
             # Кількість смуг і відносна ширина центральної
             lanes = 3
-            central_lane_ratio = 1.2  # Центральна смуга на 20% ширша
+            central_lane_ratio = 1.1  # Центральна смуга на 20% ширша
 
             # Вираховуємо ширину кожної смуги
             total_ratio = central_lane_ratio + (lanes - 1)  # 1.2 (центральна) + 1 (ліва) + 1 (права)
