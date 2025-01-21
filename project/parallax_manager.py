@@ -1,3 +1,4 @@
+import math
 import random
 
 import pygame
@@ -71,11 +72,24 @@ class Tree:
         return ROAD_HORIZON_Y - int((SCREEN_HEIGHT - ROAD_HORIZON_Y - 250) * (1 - self.depth))
 
     def update(self, player_speed):
-        self.depth -= 0.0015 * player_speed * 0.1
+        """
+        Оновлює позицію дерева на основі швидкості гравця та глибини.
+        """
+        depth_factor = 1.5  # Знижена чутливість до глибини
+        speed_scaling = 0.0001  # Налаштування масштабування швидкості
+
+        # Розрахунок зміни глибини з більш повільним наближенням
+        self.depth -= (1 - math.exp(-depth_factor * self.depth**2)) * (player_speed * speed_scaling)
         if self.depth < 0.1:
             self.depth = 0
 
-        self.x += self.direction * 0.3 * (1 - self.depth) * player_speed
+        # Зміна координати x залежно від напрямку та глибини
+        self.x += self.direction * 0.15 * (1 - self.depth) * player_speed
+        # self.depth -= 0.0015 * player_speed * 0.1
+        # if self.depth < 0.1:
+        #     self.depth = 0
+        #
+        # self.x += self.direction * 0.3 * (1 - self.depth) * player_speed
 
     def is_visible(self):
         return self.x + self.width > 0 and self.x - self.width < SCREEN_WIDTH
