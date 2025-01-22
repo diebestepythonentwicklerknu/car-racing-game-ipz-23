@@ -1,18 +1,36 @@
+import random
+
 import pygame
 
 
 class Road:
 
     def __init__(self):
-        self.segments = [{"curve": 0} for _ in range(25)]
+        self.segments = [{"curve": 0} for _ in range(5)]
         self.offset = 0
+        self.turn_timer = 0  # Turn timer
         self.road_color = (50, 50, 50)
         self.lane_mark_color = (255, 255, 255)
         self.horizon_y = 400  # Позиція горизонту (нижче середини екрану)
+        self.transition_progress = 0.0
+        self.transition_duration = 5.0
+        self.turn_delay = 5.0
+        self.delay_timer = 0
+        self.current_turn = "straight"
+        self.next_turn = "straight"
+
+    @staticmethod
+    def generate_turn():
+        """
+        Randomly generates a turn type
+        :return: (turn_name, curve_value)
+        """
+        turn_types = ["straight", "long_left", "long_right", "hard_left", "hard_right"]
+        return random.choice(turn_types)
 
     def get_lane_positions(self, depth):
         """
-        Обчислює межі смуг для заданої глибини.
+        Calculates lane boundaries for a given depth.
         """
         road_bottom_width = 750
         road_top_width = 10
@@ -42,63 +60,107 @@ class Road:
         bottom_y = 600
         return bottom_y - (bottom_y - horizon_y) * min(depth, 1)
 
-    def update(self, speed):
+    def update(self, speed, delta_time):
         self.offset += speed / 60
+
+        if self.transition_progress < 1.0:
+            self.transition_progress += delta_time / self.transition_duration
+        else:
+            self.delay_timer += delta_time
+            if self.delay_timer >= self.turn_delay:
+                self.current_turn = self.next_turn
+                self.next_turn = self.generate_turn()
+                print(f"New Turn: {self.next_turn}")
+                self.transition_progress = 0.0
+                self.delay_timer = 0.0
+
         if self.offset >= len(self.segments):
             self.offset -= len(self.segments)
+            self.segments.append(self.segments.pop(0))  # Rotate segments
+
+    @staticmethod
+    def get_control_points(turn_name):
+        """
+        Повертає опорні точки для даного типу повороту.
+        """
+        if turn_name == "hard_left":
+            left_start = (0, 600)
+            left_control = (300, 500)
+            left_end = (0, 400)
+            right_start = (800, 600)
+            right_control = (600, 400)
+            right_end = (150, 400)
+
+        elif turn_name == "long_left":
+            left_start = (0, 600)
+            left_control = (300, 500)
+            left_end = (220, 400)
+            right_start = (800, 600)
+            right_control = (500, 400)
+            right_end = (350, 400)
+
+        elif turn_name == "long_right":
+            left_start = (0, 600)
+            left_control = (300, 400)
+            left_end = (450, 400)
+            right_start = (800, 600)
+            right_control = (500, 500)
+            right_end = (580, 400)
+
+        elif turn_name == "hard_right":
+            left_start = (0, 600)
+            left_control = (200, 400)
+            left_end = (650, 400)
+            right_start = (800, 600)
+            right_control = (500, 500)
+            right_end = (800, 400)
+
+        else:
+            left_start = (0, 600)
+            left_control = (187, 500)
+            left_end = (375, 400)
+            right_start = (800, 600)
+            right_control = (613, 500)
+            right_end = (425, 400)
+
+        return (left_start, left_control, left_end), (right_start, right_control, right_end)
+
+    @staticmethod
+    def interpolate_points(p1, p2, t):
+        """
+        Інтерполює дві точки `p1` і `p2` за параметром `t`.
+        """
+        return (1 - t) * p1[0] + t * p2[0], (1 - t) * p1[1] + t * p2[1],
 
     def render(self, screen):
         """
-        Малює дорогу з перспективою.
+        Малює дорогу з вигнутими межами, використовуючи криві Безьє.
         """
-        center = 400  # Центр екрана
-        road_bottom_width = 750
-        road_top_width = 50  # Початкова ширина дороги
-        segment_height = 8  # Висота кожного сегмента дороги
+        current_left, current_right = self.get_control_points(self.current_turn)
+        next_left, next_right = self.get_control_points(self.next_turn)
 
-        for i in range(len(self.segments)):
-            # Обчислюємо координати верхнього і нижнього країв трапеції
-            depth = i / len(self.segments)  # Відносна глибина сегмента
-            bottom_width = road_bottom_width * (1 - depth) + road_top_width * depth
-            top_width = road_bottom_width * (1 - (depth + 1 / len(self.segments))) + road_top_width * (
-                        depth + 1 / len(self.segments))
+        # Інтерполяція між контрольними точками
+        interpolated_left = [
+            self.interpolate_points(current_left[i], next_left[i], self.transition_progress) for i in range(3)]
+        interpolated_right = [
+            self.interpolate_points(current_right[i], next_right[i], self.transition_progress) for i in range(3)]
 
-            y_bottom = 600 - i * segment_height
-            y_top = y_bottom - segment_height
+        # Інтерполяція точок кривих Безьє
+        def bezier_point(t, p0, p1, p2):
+            """Розраховує точку на квадратичній кривій Безьє."""
+            return ((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
+                    (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
 
-            # Якщо сегмент вийшов за межі горизонту, не малюємо його
-            if y_top < self.horizon_y:
-                break
+        # Розрахунок точок для лівої та правої меж
+        num_segments = 50  # Кількість точок на кривій для плавності
+        left_curve = [bezier_point(t / num_segments, *interpolated_left) for t in range(num_segments + 1)]
+        right_curve = [bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
 
-            # Малюємо трапецію для сегмента
-            pygame.draw.polygon(screen, self.road_color,
-                                [(center - bottom_width // 2, y_bottom), (center + bottom_width // 2, y_bottom),
-                                    (center + top_width // 2, y_top), (center - top_width // 2, y_top), ])
-
-            # Кількість смуг і відносна ширина центральної
-            lanes = 3
-            central_lane_ratio = 1.1  # Центральна смуга на 20% ширша
-
-            # Вираховуємо ширину кожної смуги
-            total_ratio = central_lane_ratio + (lanes - 1)  # 1.2 (центральна) + 1 (ліва) + 1 (права)
-            lane_ratios = [1, central_lane_ratio, 1]  # Ліва, центральна, права
-            lane_widths_bottom = [bottom_width * (r / total_ratio) for r in lane_ratios]
-            lane_widths_top = [top_width * (r / total_ratio) for r in lane_ratios]
-
-            # Вираховуємо межі смуг (знизу і зверху)
-            lane_edges_bottom = [center - bottom_width // 2]
-            lane_edges_top = [center - top_width // 2]
-            for i in range(lanes):
-                lane_edges_bottom.append(lane_edges_bottom[-1] + lane_widths_bottom[i])
-                lane_edges_top.append(lane_edges_top[-1] + lane_widths_top[i])
-
-            # Малюємо кожну смугу дороги
-            for i in range(lanes):
-                pygame.draw.polygon(screen, self.road_color,
-                                    [(lane_edges_bottom[i], y_bottom), (lane_edges_bottom[i + 1], y_bottom),
-                                        (lane_edges_top[i + 1], y_top), (lane_edges_top[i], y_top)])
-
-            # Малюємо суцільні лінії між смугами
-            for i in range(1, lanes):
-                pygame.draw.line(screen, self.lane_mark_color, (lane_edges_bottom[i], y_bottom),
-                                 (lane_edges_top[i], y_top), 2)
+        # Малюємо дорогу як полігони між лівою та правою межею
+        for i in range(num_segments):
+            pygame.draw.polygon(screen, self.road_color, [
+                left_curve[i],  # Ліва нижня точка
+                left_curve[i + 1],  # Ліва верхня точка
+                right_curve[i + 1],  # Права верхня точка
+                right_curve[i],  # Права нижня точка
+            ], )
