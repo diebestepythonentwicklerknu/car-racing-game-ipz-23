@@ -2,7 +2,7 @@ import pygame
 
 from input_manager import InputManager
 from parallax_manager import ParallaxManager
-from player import Player
+from car import LamborghiniDiablo
 from project.constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from road import Road
 from score_manager import ScoreManager
@@ -16,14 +16,11 @@ class Game:
         pygame.display.set_caption("Racing")
         self.clock = pygame.time.Clock()
         self.running = True
-        self._initialize_game_components()  # self.reset()
-
-        # Змінні для обробки зіткнення
-        # self.collision_detected = False  # Флаг, чи є активне зіткнення
-        # self.collision_time = 0  # Час початку зіткнення
+        self._initialize_game_components()
 
     def _initialize_game_components(self):
-        self.player = Player()
+        self.car = LamborghiniDiablo()
+        self.car.speed = 0
         self.road = Road()
         self.obstacle_manager = ObstacleManager()
         self.input_manager = InputManager()
@@ -38,11 +35,11 @@ class Game:
                 self.input_manager.handle_event(event)
 
     def update(self):
-        self.input_manager.update_player(self.player)
-        self.player.update()
-        self.road.update(self.player.speed)
-        self.parallax_manager.update(self.player.speed)
-        if self.obstacle_manager.update(self.player, self.road):
+        self.input_manager.update_car(self.car)
+        self.car.update()
+        self.road.update(self.car.speed)
+        self.parallax_manager.update(self.car.speed)
+        if self.obstacle_manager.update(self.car, self.road):
             pygame.time.delay(500)  # Затримка в 500 мс
             self._initialize_game_components()
         self.score_manager.update()
@@ -52,7 +49,7 @@ class Game:
         self.parallax_manager.render(self.screen)
         self.road.render(self.screen)
         self.obstacle_manager.render(self.screen, self.road)
-        self.player.render(self.screen)
+        self.car.render(self.screen)
         self.score_manager.render(self.screen)
 
     def run(self):

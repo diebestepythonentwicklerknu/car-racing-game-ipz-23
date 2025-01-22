@@ -3,45 +3,41 @@ import pygame
 
 class InputManager:
     """
-    Обробка натискань клавіш.
+    Клас для управління ввідними подіями
     """
+
     def __init__(self):
-        self.left_pressed = False
-        self.right_pressed = False
-        self.accelerate_pressed = False
-        self.decelerate_pressed = False
+        self.actions = {
+            pygame.K_LEFT: 'left',
+            pygame.K_RIGHT: 'right',
+            pygame.K_UP: 'accelerate',
+            pygame.K_DOWN: 'brake'
+        }
+        self.pressed_keys = set()
 
     def handle_event(self, event):
-
+        """
+        Обробляє події натискання та відпускання клавіш.
+        """
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                self.left_pressed = True
-            elif event.key == pygame.K_RIGHT:
-                self.right_pressed = True
-            elif event.key == pygame.K_UP:
-                self.accelerate_pressed = True
-            elif event.key == pygame.K_DOWN:
-                self.decelerate_pressed = True
-
+            self.pressed_keys.add(event.key)
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT:
-                self.left_pressed = False
-            elif event.key == pygame.K_RIGHT:
-                self.right_pressed = False
-            elif event.key == pygame.K_UP:
-                self.accelerate_pressed = False
-            elif event.key == pygame.K_DOWN:
-                self.decelerate_pressed = False
+            self.pressed_keys.discard(event.key)
 
-    def update_player(self, player):
+    def update_car(self, car):
         """
-        Оновлює стан гравця залежно від натиснутих клавіш.
+        Оновлює стан автомобіля на основі натиснутих клавіш.
         """
-        if self.left_pressed:
-            player.move_left()
-        if self.right_pressed:
-            player.move_right()
-        if self.accelerate_pressed:
-            player.increase_speed()
-        if self.decelerate_pressed:
-            player.decrease_speed()
+        if pygame.K_LEFT in self.pressed_keys:
+            car.move_left()
+        if pygame.K_RIGHT in self.pressed_keys:
+            car.move_right()
+        if pygame.K_UP in self.pressed_keys:
+            car.increase_throttle()
+        elif pygame.K_DOWN in self.pressed_keys:
+            car.decrease_throttle()
+        else:
+            car.apply_inertia()
+            car.throttle_inertia()
+
+
