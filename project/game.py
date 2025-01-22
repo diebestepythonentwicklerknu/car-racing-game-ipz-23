@@ -1,7 +1,6 @@
 import pygame
 
 from input_manager import InputManager
-from pygame.locals import KEYDOWN, KEYUP
 from parallax_manager import ParallaxManager
 from car import LamborghiniDiablo
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
