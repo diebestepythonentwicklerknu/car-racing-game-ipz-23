@@ -1,13 +1,13 @@
 import pygame
 
 from input_manager import InputManager
+from pygame.locals import KEYDOWN, KEYUP
 from parallax_manager import ParallaxManager
 from car import LamborghiniDiablo
-from project.constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from road import Road
 from score_manager import ScoreManager
-from obstacle import ObstacleManager
-
+from obstacle_manage import ObstacleManager # FIX: Obstacle Manager was moved to a separate file
 
 class Game:
     def __init__(self):
@@ -37,12 +37,15 @@ class Game:
     def update(self):
         self.input_manager.update_car(self.car)
         self.car.update()
-        self.road.update(self.car.speed)
-        self.parallax_manager.update(self.car.speed)
-        if self.obstacle_manager.update(self.car, self.road):
-            pygame.time.delay(500)  # Затримка в 500 мс
-            self._initialize_game_components()
-        self.score_manager.update()
+        
+        if self.car.speed != 0: # FIX: if the speed is set to 0, than do not update parallax & score
+            self.road.update(self.car.speed)
+            self.parallax_manager.update(self.car.speed)
+            
+            if self.obstacle_manager.update(self.car, self.road):
+                pygame.time.delay(100)  # Lowered the delay, 'cause feel like we need some hardcore on the road >:3
+                self._initialize_game_components()
+            self.score_manager.update()
 
     def render(self):
         self.screen.fill((100, 200, 255))  # Блакитне небо
