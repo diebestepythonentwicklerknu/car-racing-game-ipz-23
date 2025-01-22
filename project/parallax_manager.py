@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from project.constants import SCREEN_WIDTH, ROAD_TOP_WIDTH, SCREEN_HEIGHT, ROAD_HORIZON_Y
+from constants import SCREEN_WIDTH, ROAD_TOP_WIDTH, SCREEN_HEIGHT, ROAD_HORIZON_Y
 
 
 class ParallaxManager:

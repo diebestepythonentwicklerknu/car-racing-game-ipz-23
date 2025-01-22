@@ -1,6 +1,6 @@
 import math
 import pygame
-from project.constants import SCREEN_WIDTH
+from constants import SCREEN_WIDTH
 
 
 class Car:
