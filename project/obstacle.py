@@ -14,7 +14,7 @@ class ObstacleManager:
         for obstacle in self.obstacles:
             obstacle.update()
             if obstacle.get_reduced_rect(road).colliderect(player.get_rect()):
-                collision_detected = True
+                collision_detected = False
 
         # Видалення перешкод
         self.obstacles = [o for o in self.obstacles if o.depth > 0.3]

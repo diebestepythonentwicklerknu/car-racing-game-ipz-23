@@ -35,9 +35,10 @@ class Game:
                 self.input_manager.handle_event(event)
 
     def update(self):
+        delta_time = self.clock.get_time() / 1000
         self.input_manager.update_car(self.car)
         self.car.update()
-        self.road.update(self.car.speed)
+        self.road.update(self.car.speed, delta_time)
         self.parallax_manager.update(self.car.speed)
         if self.obstacle_manager.update(self.car, self.road):
             pygame.time.delay(500)  # Затримка в 500 мс

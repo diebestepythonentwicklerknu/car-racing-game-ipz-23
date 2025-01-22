@@ -7,6 +7,7 @@ class Car:
     """
     Клас автомобіля
     """
+
     def __init__(self, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
         self.x = SCREEN_WIDTH // 2  # Початкове положення по горизонталі
         self.y = 500  # Початкове положення по вертикалі
@@ -122,10 +123,13 @@ class Car:
         """
         if self.speed > 0 or self.throttle > 0:
             # Обчислення сили аеродинамічного опору
-            drag_force = 0.5 * self.drag_coefficient * self.air_density * self.frontal_area * (self.speed / 3.6)**2
+            drag_force = 0.5 * self.drag_coefficient * self.air_density * self.frontal_area * (self.speed / 3.6) ** 2
 
             # Обмеження максимальної тяги двигуна
-            max_force = (self.max_power * self.throttle) / max(self.speed / 3.6, 1e-6) if self.speed > 0 else self.max_power * self.throttle
+            max_force = ((self.max_power * self.throttle) /
+                         max(self.speed / 3.6, 1e-6))\
+                if self.speed > 0\
+                else self.max_power * self.throttle
 
             # Чиста сила для прискорення
             net_force = max(0, max_force - drag_force)
@@ -154,13 +158,16 @@ class Car:
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
 
+
 class LamborghiniDiablo(Car):
     def __init__(self):
-        super().__init__(max_speed=322, mass=1576, max_power=367000, drag_coefficient=0.31, frontal_area=2.0, wheelbase=2.65)
+        super().__init__(max_speed=322, mass=1576, max_power=367000, drag_coefficient=0.31, frontal_area=2.0,
+                         wheelbase=2.65)
         self.color = (255, 215, 0)  # Жовтий Lamborghini
 
 
 class FerrariF40(Car):
     def __init__(self):
-        super().__init__(max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9, wheelbase=2.45)
+        super().__init__(max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
+                         wheelbase=2.45)
         self.color = (255, 0, 0)  # Червоний Ferrari

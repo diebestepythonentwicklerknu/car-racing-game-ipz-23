@@ -85,11 +85,6 @@ class Tree:
 
         # Зміна координати x залежно від напрямку та глибини
         self.x += self.direction * 0.15 * (1 - self.depth) * player_speed * 0.2
-        # self.depth -= 0.0015 * player_speed * 0.1
-        # if self.depth < 0.1:
-        #     self.depth = 0
-        #
-        # self.x += self.direction * 0.3 * (1 - self.depth) * player_speed
 
     def is_visible(self):
         return self.x + self.width > 0 and self.x - self.width < SCREEN_WIDTH
