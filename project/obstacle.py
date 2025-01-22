@@ -1,52 +1,8 @@
 import pygame
-import random
-
-
-class ObstacleManager:
-    def __init__(self):
-        self.obstacles = []
-
-    def update(self, player, road):
-        """
-        Оновлює позицію перешкод.
-        """
-        collision_detected = False
-        for obstacle in self.obstacles:
-            obstacle.update()
-            if obstacle.get_reduced_rect(road).colliderect(player.get_rect()):
-                collision_detected = False
-
-        # Видалення перешкод
-        self.obstacles = [o for o in self.obstacles if o.depth > 0.3]
-
-        # Генерація перешкод
-        if random.random() < 0.01:
-            lane = random.randint(0, 2)
-            self.obstacles.append(Obstacle(lane))
-
-        return collision_detected
-
-    def check_collision(self, player, road):
-        """
-        Перевіряє, чи є зіткнення між гравцем і будь-якою перешкодою. Не ворк
-        """
-        for obstacle in self.obstacles:
-            if obstacle.get_rect(road).colliderect(player.get_rect()):
-                return True
-        return False
-
-    def render(self, screen, road):
-        """
-        Малює всі перешкоди.
-        """
-        for obstacle in self.obstacles:
-            obstacle.render(screen, road)
-
-
 class Obstacle:
-    def __init__(self, lane):
+    def __init__(self, lane, depth = 1):
         self.lane = lane
-        self.depth = 1  # Початкова глибина (горизонт)
+        self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
 
     def update(self):
