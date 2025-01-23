@@ -18,7 +18,7 @@ class ObstacleManager:
                 collision_detected = True
 
         # Видалення перешкод
-        self.obstacles = [o for o in self.obstacles if o.depth > 0.3]
+        self.obstacles = [o for o in self.obstacles if o.depth > 0.15]
 
         # Obstacle generation
         # Basically, we create either 1 or 2 obstacles on the horizon

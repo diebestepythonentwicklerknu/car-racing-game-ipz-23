@@ -13,8 +13,6 @@ class Obstacle:
         Оновлює глибину перешкоди для наближення.
         """
         self.depth -= self.speed_factor * (car_speed / 100)  # Чим ближче до гравця, тим менша глибина
-        if self.depth <= 0.1:
-            self.depth = 0
 
     def get_rect(self, road):
         """

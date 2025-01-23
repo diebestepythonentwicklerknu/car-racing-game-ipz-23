@@ -74,14 +74,6 @@ class Road:
 
         return lane_edges, left_edge[1]
 
-    def get_y_position(self, depth):
-        """
-        Повертає координату `y` для об'єкта на основі глибини.
-        """
-        horizon_y = self.horizon_y
-        bottom_y = 600
-        return bottom_y - (bottom_y - horizon_y) * min(depth, 1)
-
     def update(self, speed, delta_time):
         self.offset += speed / 60
 

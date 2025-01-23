@@ -7,6 +7,7 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.running = True
+        pygame.display.set_caption("Menu")
 
         # Завантаження ретро-фону з файлу (в каталозі проєкту)
         self.background = pygame.image.load(os.path.join(os.path.dirname(__file__), "assets", "1_retro_background.png"))
@@ -47,7 +48,7 @@ class Menu:
             pygame.draw.rect(self.screen, (0, 0, 0), button["rect"])  # Чорний фон
             pygame.draw.rect(self.screen, (255, 255, 255), button["rect"], 3)  # Білий контур навколо кнопки
             text = self.font.render(button["text"], True, (255, 255, 255))
-            text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2 # Текст по центру кнопки
+            text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Текст по центру кнопки
             text_y = button["rect"].y + (button["rect"].height - text.get_height()) // 2
             self.screen.blit(text, (text_x, text_y))
 

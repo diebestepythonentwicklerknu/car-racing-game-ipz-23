@@ -47,7 +47,7 @@ class Game:
 
             if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
                 self.road.update(self.car.speed, delta_time)
-                self.parallax_manager.update(self.car.speed)
+                self.parallax_manager.update(self.car.speed, self.road)
 
                 if self.obstacle_manager.update(self.car, self.road):
                     pygame.time.delay(100)  # Затримка після аварії
