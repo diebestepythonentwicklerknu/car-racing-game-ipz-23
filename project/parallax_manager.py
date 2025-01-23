@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from project.constants import SCREEN_WIDTH, ROAD_TOP_WIDTH, SCREEN_HEIGHT, ROAD_HORIZON_Y
+from constants import SCREEN_WIDTH, ROAD_TOP_WIDTH, SCREEN_HEIGHT, ROAD_HORIZON_Y
 
 
 class ParallaxManager:
@@ -36,7 +36,7 @@ class ParallaxManager:
                 [random.randint(0, (SCREEN_WIDTH // 2) - (ROAD_TOP_WIDTH // 2)),  # Ліворуч від дороги
                  random.randint((SCREEN_WIDTH // 2) + (ROAD_TOP_WIDTH // 2), SCREEN_WIDTH)  # Праворуч від дороги
                  ])
-            self.trees.append(Tree(position_x, random.uniform(0.8, 1.5)))
+            self.trees.append(Tree(position_x))
 
     def render(self, screen):
         """
@@ -49,7 +49,7 @@ class ParallaxManager:
 
 
 class Tree:
-    def __init__(self, x, scale):
+    def __init__(self, x):
         self.x = x
         self.base_y = ROAD_HORIZON_Y  # Рівень горизонту
         self.max_height = 300  # Максимальна висота дерева

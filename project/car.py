@@ -1,6 +1,6 @@
 import math
 import pygame
-from project.constants import SCREEN_WIDTH
+from constants import SCREEN_WIDTH
 
 
 class Car:
@@ -53,12 +53,13 @@ class Car:
         elif self.steering_angle < 0:
             self.steering_angle = min(self.steering_angle + 1, 0)
 
-    def update(self):
+    def update(self, road, delta_time):
         """
         Оновлення стану автомобіля.
         """
         self._update_speed()
         self._update_position()
+        self.apply_road_force(road, delta_time)
         self.reset_steering()
 
     def render(self, screen):
@@ -116,6 +117,31 @@ class Car:
         Повертає прямокутник автомобіля для перевірки зіткнень.
         """
         return pygame.Rect(self.x - self.width // 2, self.y, self.width, self.height)
+
+    def apply_road_force(self, road, delta_time):
+        """
+        Вплив дороги на автомобіль залежно від типу повороту.
+        """
+        # Визначення сили впливу для кожного типу повороту
+        turn_effect = {
+            "straight": 0,  # Без зміщення
+            "long_left": 0.4,  # Легкий вплив вправо
+            "long_right": -0.4,  # Легкий вплив вліво
+            "hard_left": 0.8,  # Сильний вплив вправо
+            "hard_right": -0.8  # Сильний вплив вліво
+        }
+
+        # Отримання сили впливу повороту
+        force_multiplier = turn_effect.get(road.next_turn, 0)
+
+        # Розрахунок зміщення залежно від швидкості та часу
+        force = force_multiplier * self.speed * delta_time
+
+        # Зміщення автомобіля
+        self.x += force
+
+        # Обмеження в межах дороги
+        self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
 
     def _update_speed(self):
         """
