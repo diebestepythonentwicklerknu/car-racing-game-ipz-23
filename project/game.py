@@ -41,14 +41,15 @@ class Game:
 
     def update(self):
         if not self.paused:  # Оновлюємо гру лише якщо не пауза
-            self.input_manager.update_car(self.car)
-            self.car.update()
-            self.road.update(self.car.speed)
-            self.parallax_manager.update(self.car.speed)
-            if self.obstacle_manager.update(self.car, self.road):
-                pygame.time.delay(500)  # Затримка в 500 мс
-                self._initialize_game_components()
-            self.score_manager.update()
+          delta_time = self.clock.get_time() / 1000
+          self.input_manager.update_car(self.car)
+          self.car.update()
+          self.road.update(self.car.speed, delta_time)
+          self.parallax_manager.update(self.car.speed)
+          if self.obstacle_manager.update(self.car, self.road):
+              pygame.time.delay(500)  # Затримка в 500 мс
+              self._initialize_game_components()
+          self.score_manager.update()
 
     def render(self):
         if not self.paused:  # Малюємо гру лише якщо не пауза
