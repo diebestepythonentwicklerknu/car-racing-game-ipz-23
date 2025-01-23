@@ -43,7 +43,7 @@ class Game:
         if not self.paused:  # Оновлюємо гру лише якщо не пауза
             delta_time = self.clock.get_time() / 1000
             self.input_manager.update_car(self.car)
-            self.car.update()
+            self.car.update(self.road, delta_time)
 
             if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
                 self.road.update(self.car.speed, delta_time)

@@ -91,8 +91,9 @@ class Road:
             self.delay_timer += delta_time
             if self.delay_timer >= self.turn_delay:
                 self.current_turn = self.next_turn
+                print(f"Current Turn: {self.current_turn}")
                 self.next_turn = self.generate_turn()
-                print(f"New Turn: {self.next_turn}")
+                print(f"Next Turn: {self.next_turn}")
                 self.transition_progress = 0.0
                 self.delay_timer = 0.0
 
