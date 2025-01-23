@@ -1,15 +1,18 @@
 import pygame
+
+
 class Obstacle:
-    def __init__(self, lane, depth = 1):
+    def __init__(self, lane, depth=1):
         self.lane = lane
         self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
+        self.speed_factor = 0.005
 
-    def update(self):
+    def update(self, car_speed):
         """
         Оновлює глибину перешкоди для наближення.
         """
-        self.depth -= 0.006  # Чим ближче до гравця, тим менша глибина
+        self.depth -= self.speed_factor * (car_speed / 100)  # Чим ближче до гравця, тим менша глибина
         if self.depth <= 0.1:
             self.depth = 0
 

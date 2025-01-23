@@ -2,6 +2,8 @@ import random
 
 import pygame
 
+from project.constants import SCREEN_HEIGHT, ROAD_HORIZON_Y
+
 
 class Road:
 
@@ -32,25 +34,45 @@ class Road:
         """
         Calculates lane boundaries for a given depth.
         """
-        road_bottom_width = 750
-        road_top_width = 10
+        # Отримання координат лівої та правої меж дороги
+        current_left, current_right = self.get_control_points(self.current_turn)
+        next_left, next_right = self.get_control_points(self.next_turn)
+
+        # Інтерполяція контрольних точок
+        interpolated_left = [
+            self.interpolate_points(current_left[i], next_left[i], self.transition_progress)
+            for i in range(3)
+        ]
+        interpolated_right = [
+            self.interpolate_points(current_right[i], next_right[i], self.transition_progress)
+            for i in range(3)
+        ]
+
+        # Розрахунок позицій для заданої глибини за допомогою кривих Безьє
+        def bezier_point(t, p0, p1, p2):
+            """Розрахунок точки на квадратичній кривій Безьє."""
+            return (
+                (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
+                (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],
+            )
+
+        t = min(depth, 1)  # Переконатися, що t в межах [0, 1]
+        left_edge = bezier_point(t, *interpolated_left)
+        right_edge = bezier_point(t, *interpolated_right)
+
+        # Ширина дороги
+        road_width = right_edge[0] - left_edge[0]
+
+        # Пропорції ширини для кожної смуги
         total_ratio = 3.2  # Ліва (1) + Центральна (1.2) + Права (1)
-        lane_ratios = [1, 1.2, 1]  # Відносна ширина смуг
+        lane_ratios = [1, 1.2, 1]  # Відносна ширина кожної смуги
 
-        # Ширина дороги на заданій глибині
-        width = road_bottom_width * (1 - min(depth, 1)) + road_top_width * max(depth - 1, 0)
+        # Розрахунок меж смуг
+        lane_edges = [left_edge[0]]
+        for ratio in lane_ratios:
+            lane_edges.append(lane_edges[-1] + road_width * (ratio / total_ratio))
 
-        # Ширина кожної смуги
-        lane_widths = [width * (r / total_ratio) for r in lane_ratios]
-
-        # Межі смуг
-        center_y = self.get_y_position(depth)  # Вертикальна координата
-        start_x = 400 - width // 2
-        lane_edges = [start_x]
-        for lane_width in lane_widths:
-            lane_edges.append(lane_edges[-1] + lane_width)
-
-        return lane_edges, center_y
+        return lane_edges, left_edge[1]
 
     def get_y_position(self, depth):
         """
@@ -134,7 +156,7 @@ class Road:
 
     def render(self, screen):
         """
-        Малює дорогу з вигнутими межами, використовуючи криві Безьє.
+        Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
         """
         current_left, current_right = self.get_control_points(self.current_turn)
         next_left, next_right = self.get_control_points(self.next_turn)
@@ -156,7 +178,24 @@ class Road:
         left_curve = [bezier_point(t / num_segments, *interpolated_left) for t in range(num_segments + 1)]
         right_curve = [bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
 
-        # Малюємо дорогу як полігони між лівою та правою межею
+        # Розрахунок точок для центральних ліній (розділових смуг)
+        central_curve_left = [
+            (
+                left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
+                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,
+            )
+            for i in range(len(left_curve))
+        ]
+
+        central_curve_right = [
+            (
+                left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
+                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,
+            )
+            for i in range(len(left_curve))
+        ]
+
+        # Draw road
         for i in range(num_segments):
             pygame.draw.polygon(screen, self.road_color, [
                 left_curve[i],  # Ліва нижня точка
@@ -164,3 +203,9 @@ class Road:
                 right_curve[i + 1],  # Права верхня точка
                 right_curve[i],  # Права нижня точка
             ], )
+
+
+        # Draw dividing lines for lanes
+        for i in range(num_segments):
+            pygame.draw.line(screen, self.lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
+            pygame.draw.line(screen, self.lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
