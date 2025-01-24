@@ -1,12 +1,12 @@
 import pygame
 
-from input_manager import InputManager
-from parallax_manager import ParallaxManager
 from car import LamborghiniDiablo
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from input_manager import InputManager
+from parallax_manager import ParallaxManager
+from project.obstacle_manager import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
 from road import Road
 from score_manager import ScoreManager
-from project.obstacle_manager import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
 
 
 class Game:

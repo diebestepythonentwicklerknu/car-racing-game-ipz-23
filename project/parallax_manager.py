@@ -45,13 +45,19 @@ class ParallaxManager:
         # Generate trees relative to the road's curvature
         depth = random.uniform(1.0, 1.2)
         lane_edges, y_position = road.get_lane_positions(depth)
-        if side == 'left':
-            position_x = random.randint(0, int(lane_edges[0]))
-        else:
-            position_x = random.randint(int(lane_edges[-1]), SCREEN_WIDTH)
+        offset = random.randint(10, 100)  # Fixed offset range
 
-        print(position_x)
-        self.trees.append(Tree(position_x, side, depth, offset=position_x))
+        if side == 'left':
+            if int(lane_edges[0]) - offset > 0:
+                position_x = random.randint(0, int(lane_edges[0]) - offset)
+            else:
+                return
+        elif int(lane_edges[-1]) + offset < SCREEN_WIDTH - 1:
+            position_x = random.randint(int(lane_edges[-1]) + offset, SCREEN_WIDTH)
+        else:
+            return
+
+        self.trees.append(Tree(position_x, side, depth, offset))
 
     def render(self, screen):
         """
@@ -89,7 +95,7 @@ class Tree:
         """
         Update tree position and depth based on player speed and road curvature.
         """
-        speed_factor = 0.005  # Speed scaling factor
+        speed_factor = 0.008  # Speed scaling factor
 
         # Update depth based on speed
         self.depth -= speed_factor * (car_speed / 100)
@@ -100,7 +106,11 @@ class Tree:
         lane_edges, self.y = road.get_lane_positions(self.depth)
         if self.side == 'left':
             self.x = lane_edges[0] - self.offset  # Keep it to the left of the road
+            if road.next_turn == 'long_left' or 'hard_left':
+                self.x -= 50
         elif self.side == 'right':
+            if road.next_turn == 'long_right' or 'hard_right':
+                self.x += 50
             self.x = lane_edges[-1] + self.offset  # Keep it to the right of the road
 
     def is_visible(self):

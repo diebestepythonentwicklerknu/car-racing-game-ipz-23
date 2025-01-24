@@ -6,7 +6,7 @@ class Obstacle:
         self.lane = lane
         self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
-        self.speed_factor = 0.005
+        self.speed_factor = 0.008
 
     def update(self, car_speed):
         """
@@ -33,11 +33,7 @@ class Obstacle:
         rect = self.get_rect(road)
         reduced_width = rect.width // 2
         reduced_height = rect.height // 2
-        return pygame.Rect(
-            rect.x + rect.width // 4,
-            rect.y + rect.height // 4,
-            reduced_width, reduced_height
-        )
+        return pygame.Rect(rect.x + rect.width // 4, rect.y + rect.height // 4, reduced_width, reduced_height)
 
     def render(self, screen, road):
         """

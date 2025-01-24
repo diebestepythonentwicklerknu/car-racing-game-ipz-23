@@ -7,12 +7,10 @@ class InputManager:
     """
 
     def __init__(self):
-        self.actions = {
-            pygame.K_LEFT: 'left',
-            pygame.K_RIGHT: 'right',
-            pygame.K_UP: 'accelerate',
-            pygame.K_DOWN: 'brake',
-        }
+        self.actions = {pygame.K_LEFT: 'left',
+                        pygame.K_RIGHT: 'right',
+                        pygame.K_UP: 'accelerate',
+                        pygame.K_DOWN: 'brake', }
         self.pressed_keys = set()
         self.pause_key_pressed = False
         self.pause_key_handled = False  # Для обробки натискання Space один раз
