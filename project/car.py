@@ -1,5 +1,7 @@
 import math
+
 import pygame
+
 from constants import SCREEN_WIDTH
 
 
@@ -123,13 +125,12 @@ class Car:
         Вплив дороги на автомобіль залежно від типу повороту.
         """
         # Визначення сили впливу для кожного типу повороту
-        turn_effect = {
-            "straight": 0,  # Без зміщення
-            "long_left": 0.4,  # Легкий вплив вправо
-            "long_right": -0.4,  # Легкий вплив вліво
-            "hard_left": 0.8,  # Сильний вплив вправо
-            "hard_right": -0.8  # Сильний вплив вліво
-        }
+        turn_effect = {"straight": 0,  # Без зміщення
+                       "long_left": 0.4,  # Легкий вплив вправо
+                       "long_right": -0.4,  # Легкий вплив вліво
+                       "hard_left": 0.8,  # Сильний вплив вправо
+                       "hard_right": -0.8  # Сильний вплив вліво
+                       }
 
         # Отримання сили впливу повороту
         force_multiplier = turn_effect.get(road.next_turn, 0)
@@ -153,9 +154,7 @@ class Car:
 
             # Обмеження максимальної тяги двигуна
             max_force = ((self.max_power * self.throttle) /
-                         max(self.speed / 3.6, 1e-6))\
-                if self.speed > 0\
-                else self.max_power * self.throttle
+                         max(self.speed / 3.6, 1e-6)) if self.speed > 0 else self.max_power * self.throttle
 
             # Чиста сила для прискорення
             net_force = max(0, max_force - drag_force)

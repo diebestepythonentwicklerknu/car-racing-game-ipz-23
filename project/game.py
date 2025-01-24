@@ -1,12 +1,12 @@
 import pygame
 
-from input_manager import InputManager
-from parallax_manager import ParallaxManager
 from car import LamborghiniDiablo
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from input_manager import InputManager
+from parallax_manager import ParallaxManager
+from project.obstacle_manager import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
 from road import Road
 from score_manager import ScoreManager
-from project.obstacle_manager import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
 
 
 class Game:
@@ -47,7 +47,7 @@ class Game:
 
             if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
                 self.road.update(self.car.speed, delta_time)
-                self.parallax_manager.update(self.car.speed)
+                self.parallax_manager.update(self.car.speed, self.road)
 
                 if self.obstacle_manager.update(self.car, self.road):
                     pygame.time.delay(100)  # Затримка після аварії

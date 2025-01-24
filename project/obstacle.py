@@ -6,15 +6,13 @@ class Obstacle:
         self.lane = lane
         self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
-        self.speed_factor = 0.005
+        self.speed_factor = 0.008
 
     def update(self, car_speed):
         """
         Оновлює глибину перешкоди для наближення.
         """
         self.depth -= self.speed_factor * (car_speed / 100)  # Чим ближче до гравця, тим менша глибина
-        if self.depth <= 0.1:
-            self.depth = 0
 
     def get_rect(self, road):
         """
@@ -35,11 +33,7 @@ class Obstacle:
         rect = self.get_rect(road)
         reduced_width = rect.width // 2
         reduced_height = rect.height // 2
-        return pygame.Rect(
-            rect.x + rect.width // 4,
-            rect.y + rect.height // 4,
-            reduced_width, reduced_height
-        )
+        return pygame.Rect(rect.x + rect.width // 4, rect.y + rect.height // 4, reduced_width, reduced_height)
 
     def render(self, screen, road):
         """

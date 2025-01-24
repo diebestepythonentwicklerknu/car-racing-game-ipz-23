@@ -5,6 +5,7 @@ class ScoreManager:
     """
     Очки
     """
+
     def __init__(self):
         self.score = 0
         self.font = pygame.font.Font(None, 36)
