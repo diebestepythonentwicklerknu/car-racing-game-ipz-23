@@ -1,17 +1,19 @@
 import math
 import pygame
 from constants import SCREEN_WIDTH
+from utils.sprite_manager import SpriteManager
 
 
 class Car:
     """
     Клас автомобіля
     """
-    def __init__(self, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
+    def __init__(self, sprite, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
         self.x = SCREEN_WIDTH // 2  # Початкове положення по горизонталі
         self.y = 500  # Початкове положення по вертикалі
-        self.width = 120
-        self.height = 60
+        self.width = 120;
+        self.height = 30;
+        self.sprite = sprite;
         self.color = (255, 0, 0)  # Колір автомобіля
         self.speed = 0  # Початкова швидкість
         self.throttle = 0  # Рівень натискання газу (0.0 - 1.0)
@@ -75,7 +77,8 @@ class Car:
             screen.blit(outline_text, (10 + offset[0], 580 + offset[1]))
 
         screen.blit(speed_text, (10, 580))
-        pygame.draw.rect(screen, self.color, (self.x - self.width // 2, self.y, self.width, self.height))
+        screen.blit(self.sprite, (self.x - self.width // 2, self.y, self.width, self.height));
+        # pygame.draw.rect(screen, self.sprite, (self.x - self.width // 2, self.y, self.width, self.height))
 
     def increase_throttle(self):
         """
@@ -156,7 +159,9 @@ class Car:
 
 class LamborghiniDiablo(Car):
     def __init__(self):
-        super().__init__(max_speed=322, mass=1576, max_power=367000, drag_coefficient=0.31, frontal_area=2.0, wheelbase=2.65)
+        carImg = SpriteManager.loadImage('cartest2.png');
+        carSprite = SpriteManager.getFrame(carImg, 0, 64, 24);
+        super().__init__(carSprite, max_speed=322, mass=1576, max_power=367000, drag_coefficient=0.31, frontal_area=2.0, wheelbase=2.65)
         self.color = (255, 215, 0)  # Жовтий Lamborghini
 
 

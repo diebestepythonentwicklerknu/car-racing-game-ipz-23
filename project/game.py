@@ -6,7 +6,7 @@ from car import LamborghiniDiablo
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from road import Road
 from score_manager import ScoreManager
-from project.obstacle_manager import ObstacleManager # FIX: Obstacle Manager was moved to a separate file
+from obstacle_manager import ObstacleManager # FIX: Obstacle Manager was moved to a separate file
 
 class Game:
     def __init__(self):
