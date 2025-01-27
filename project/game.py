@@ -1,4 +1,5 @@
 import pygame
+import os
 
 from input_manager import InputManager
 from parallax_manager import ParallaxManager
@@ -9,6 +10,7 @@ from score_manager import ScoreManager
 from obstacle import ObstacleManager
 
 
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -17,6 +19,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.paused = False  # Додаємо флаг для паузи
+        self.show_scoreboard = False
         self._initialize_game_components()
 
     def _initialize_game_components(self):
@@ -27,6 +30,7 @@ class Game:
         self.input_manager = InputManager()
         self.score_manager = ScoreManager()
         self.parallax_manager = ParallaxManager()
+        #self.scoreboard = ScoreBoard()  # Додаємо ScoreBoard
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -39,6 +43,7 @@ class Game:
         if self.input_manager.is_pause_pressed():
             self.paused = not self.paused
 
+
     def update(self):
         if not self.paused:  # Оновлюємо гру лише якщо не пауза
           delta_time = self.clock.get_time() / 1000
@@ -46,7 +51,8 @@ class Game:
           self.car.update()
           self.road.update(self.car.speed, delta_time)
           self.parallax_manager.update(self.car.speed)
-          if self.obstacle_manager.update(self.car, self.road):
+          if self.obstacle_manager.update(self.car, self.road, self.score_manager):
+              #self.scoreboard.update(self.score_manager.score)  # Оновлюємо таблицю результатів
               pygame.time.delay(500)  # Затримка в 500 мс
               self._initialize_game_components()
           self.score_manager.update()
@@ -60,12 +66,13 @@ class Game:
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:  # Якщо пауза, відображаємо відповідне повідомлення
-            pause_font = pygame.font.Font(None, 74)
+            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "PressStart2P-Regular.ttf"), 40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
             self.screen.blit(pause_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50))
 
     def run(self):
         while self.running:
+
             self.handle_events()
             self.update()
             self.render()

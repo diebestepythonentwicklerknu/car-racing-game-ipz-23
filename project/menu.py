@@ -1,5 +1,6 @@
 import pygame
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from scoreboard import ScoreBoard
 import os
 
 
@@ -19,13 +20,32 @@ class Menu:
         # Кнопки (Поки 2, коли буде скорборд - додамо ще для цього)
         self.buttons = [
             {"text": "Start", "action": "start", "rect": pygame.Rect(250, 300, 300, 50)},
-            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 400, 300, 50)}
+            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 400, 300, 50)},
+            {"text": "ScoreBoard", "action": "quit", "rect": pygame.Rect(200, 500, 420, 70)}
         ]
 
         # Миготіння тексту
         self.title_color = (255, 255, 0)  # Жовтий
         self.title_blink = True
         self.blink_timer = 0
+
+    def show_scoreboard(self):
+        """
+        Відображає таблицю найкращих результатів.
+        """
+        scoreboard = ScoreBoard()  # Створюємо екземпляр класу ScoreBoard
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    return  # Вихід із таблиці результатів у меню
+
+            self.screen.fill((0, 0, 0))  # Чорний фон
+            scoreboard.render(self.screen)  # Відображення таблиці результатів
+            pygame.display.flip()
+
 
 
     def render(self):
@@ -70,6 +90,8 @@ class Menu:
                         elif button["action"] == "quit":
                             pygame.quit()
                             exit()
+                        elif button["action"] == "scoreboard":
+                            self.show_scoreboard()
 
     def update(self):
         """
@@ -87,7 +109,7 @@ class Menu:
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
-
+            
             self.update()
             self.render()
             pygame.display.flip()
