@@ -5,10 +5,9 @@ from car import LamborghiniDiablo
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from input_manager import InputManager
 from parallax_manager import ParallaxManager
-from obstacle import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
+from obstacle_manager import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
 from road import Road
 from score_manager import ScoreManager
-
 
 
 class Game:
@@ -30,7 +29,7 @@ class Game:
         self.input_manager = InputManager()
         self.score_manager = ScoreManager()
         self.parallax_manager = ParallaxManager()
-        #self.scoreboard = ScoreBoard()  # Додаємо ScoreBoard
+        #  self.scoreboard = ScoreBoard()  # Додаємо ScoreBoard
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -42,7 +41,6 @@ class Game:
         # Перемикаємо стан паузи
         if self.input_manager.is_pause_pressed():
             self.paused = not self.paused
-
 
     def update(self):
         if not self.paused:  # Оновлюємо гру лише якщо не пауза
@@ -68,13 +66,13 @@ class Game:
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:  # Якщо пауза, відображаємо відповідне повідомлення
-            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),"assets", "PressStart2P-Regular.ttf"), 40)
+            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
+                                                       "assets", "PressStart2P-Regular.ttf"), 40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
             self.screen.blit(pause_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50))
 
     def run(self):
         while self.running:
-
             self.handle_events()
             self.update()
             self.render()

@@ -1,4 +1,8 @@
+import os
 import random
+import time
+
+import pygame
 
 from obstacle import Obstacle
 
@@ -6,24 +10,40 @@ from obstacle import Obstacle
 class ObstacleManager:
     def __init__(self):
         self.obstacles = []
+        self.near_obstacles = set()
+        self.messages = []
 
-    def update(self, car, road):
+    def update(self, player, road, score_manager, car_speed):
         """
-        Оновлює позицію перешкод.
+        Updates obstacle positions
         """
         collision_detected = False
-
+        player_rect = player.get_rect()
         for obstacle in self.obstacles:
-            obstacle.update(car.speed)
-            if obstacle.get_reduced_rect(road).colliderect(car.get_rect()):
+            obstacle.update(car_speed)
+
+            if obstacle.get_reduced_rect(road).colliderect(player.get_rect()):
                 collision_detected = True
 
+            # If player goes over 150 kph and near obstacle + 100 to current score
+            # Uses wider hitbox
+            if obstacle not in self.near_obstacles:
+                if obstacle.get_increased_rect(road).colliderect(player.get_rect()) and car_speed > 150:
+                    self.near_obstacles.add(obstacle)
+                    score_manager.add_score(100)
+
+                    self.messages.append({
+                        "text": "+100 points!",
+                        "time": time.time(),  # Store the current time
+                        "position": (player_rect.centerx, player_rect.top - 20)  # Above the player
+                    })
+
         # Видалення перешкод
-        self.obstacles = [o for o in self.obstacles if o.depth > 0.15]
+        self.obstacles = [o for o in self.obstacles if o.depth > 0.1]
 
-        # Obstacle generation
-        # Basically, we create either 1 or 2 obstacles on the horizon
+        self.near_obstacles = {o for o in self.near_obstacles if o in self.obstacles}
 
+        # Генерація перешкод
         if random.random() < 0.01:
             if len(self.obstacles) < 2:
                 lane = random.randint(0, 2)
@@ -50,3 +70,14 @@ class ObstacleManager:
         """
         for obstacle in self.obstacles:
             obstacle.render(screen, road)
+
+        # Малює повідомлення про бонусні очки
+        current_time = time.time()
+        for message in self.messages[:]:
+            if current_time - message["time"] <= 1:  # Відображає повідомлення протягом 1 секунди
+                message_font = pygame.font.Font(
+                    os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
+                text_surface = message_font.render(message["text"], True, (255, 255, 0))
+                screen.blit(text_surface, message["position"])
+            else:
+                self.messages.remove(message)  # Видаляє повідомлення після закінчення часу (1 секунда)
