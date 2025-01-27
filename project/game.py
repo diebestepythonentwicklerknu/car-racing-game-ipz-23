@@ -1,13 +1,13 @@
 import pygame
 import os
 
-from input_manager import InputManager
-from parallax_manager import ParallaxManager
 from car import LamborghiniDiablo
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from input_manager import InputManager
+from parallax_manager import ParallaxManager
+from obstacle import ObstacleManager  # FIX: Obstacle Manager was moved to a separate file
 from road import Road
 from score_manager import ScoreManager
-from obstacle import ObstacleManager
 
 
 
@@ -46,16 +46,18 @@ class Game:
 
     def update(self):
         if not self.paused:  # Оновлюємо гру лише якщо не пауза
-          delta_time = self.clock.get_time() / 1000
-          self.input_manager.update_car(self.car)
-          self.car.update()
-          self.road.update(self.car.speed, delta_time)
-          self.parallax_manager.update(self.car.speed)
-          if self.obstacle_manager.update(self.car, self.road, self.score_manager):
-              #self.scoreboard.update(self.score_manager.score)  # Оновлюємо таблицю результатів
-              pygame.time.delay(500)  # Затримка в 500 мс
-              self._initialize_game_components()
-          self.score_manager.update()
+            delta_time = self.clock.get_time() / 1000
+            self.input_manager.update_car(self.car)
+            self.car.update(self.road, delta_time)
+
+            if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
+                self.road.update(self.car.speed, delta_time)
+                self.parallax_manager.update(self.car.speed, self.road)
+
+                if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
+                    pygame.time.delay(100)  # Затримка після аварії
+                    self._initialize_game_components()
+                self.score_manager.update()
 
     def render(self):
         if not self.paused:  # Малюємо гру лише якщо не пауза
@@ -66,7 +68,7 @@ class Game:
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:  # Якщо пауза, відображаємо відповідне повідомлення
-            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "PressStart2P-Regular.ttf"), 40)
+            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),"assets", "PressStart2P-Regular.ttf"), 40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
             self.screen.blit(pause_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50))
 
@@ -79,4 +81,3 @@ class Game:
             pygame.display.flip()
             self.clock.tick(FPS)
         pygame.quit()
-

@@ -8,14 +8,15 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.running = True
+        pygame.display.set_caption("Menu")
 
         # Завантаження ретро-фону з файлу (в каталозі проєкту)
-        self.background = pygame.image.load(os.path.join(os.path.dirname(__file__), "1_retro_background.png"))
+        self.background = pygame.image.load(os.path.join(os.path.dirname(__file__), "assets", "1_retro_background.png"))
         self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
         # Завантаження ретро-шрифту аналогічно
-        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "PressStart2P-Regular.ttf"), 40)
-        self.title_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "PressStart2P-Regular.ttf"), 36)
+        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 40)
+        self.title_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 36)
 
         # Кнопки (Поки 2, коли буде скорборд - додамо ще для цього)
         self.buttons = [
@@ -28,25 +29,6 @@ class Menu:
         self.title_color = (255, 255, 0)  # Жовтий
         self.title_blink = True
         self.blink_timer = 0
-
-    def show_scoreboard(self):
-        """
-        Відображає таблицю найкращих результатів.
-        """
-        scoreboard = ScoreBoard()  # Створюємо екземпляр класу ScoreBoard
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    return  # Вихід із таблиці результатів у меню
-
-            self.screen.fill((0, 0, 0))  # Чорний фон
-            scoreboard.render(self.screen)  # Відображення таблиці результатів
-            pygame.display.flip()
-
-
 
     def render(self):
         """
@@ -61,16 +43,14 @@ class Menu:
             (SCREEN_WIDTH // 2 - title_text.get_width() // 2 + 15, 100)
         )
 
-        
         # Малюємо кнопки
         for button in self.buttons:
 
-            #button_rect = button["rect"].move(50, 0)
-
+            #  button_rect = button["rect"].move(50, 0)
             pygame.draw.rect(self.screen, (0, 0, 0), button["rect"])  # Чорний фон
             pygame.draw.rect(self.screen, (255, 255, 255), button["rect"], 3)  # Білий контур навколо кнопки
             text = self.font.render(button["text"], True, (255, 255, 255))
-            text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2 # Текст по центру кнопки
+            text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Текст по центру кнопки
             text_y = button["rect"].y + (button["rect"].height - text.get_height()) // 2
             self.screen.blit(text, (text_x, text_y))
 

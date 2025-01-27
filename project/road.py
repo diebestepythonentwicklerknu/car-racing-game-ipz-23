@@ -28,37 +28,62 @@ class Road:
         turn_types = ["straight", "long_left", "long_right", "hard_left", "hard_right"]
         return random.choice(turn_types)
 
+    @staticmethod
+    def bezier_point(t, p0, p1, p2):
+        """Розраховує точку на квадратичній кривій Безьє."""
+        return ((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
+                (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
+
+    @staticmethod
+    def calculate_control_points(turn_name):
+        """
+        Returns the control points for the given type of turn.
+        """
+        control_points = {
+            "hard_left": {"left": [(0, 600), (300, 500), (0, 400)], "right": [(800, 600), (600, 400), (150, 400)], },
+            "long_left": {"left": [(0, 600), (300, 500), (220, 400)], "right": [(800, 600), (500, 400), (350, 400)], },
+            "long_right": {"left": [(0, 600), (300, 400), (450, 400)], "right": [(800, 600), (500, 500), (580, 400)], },
+            "hard_right": {"left": [(0, 600), (200, 400), (650, 400)], "right": [(800, 600), (500, 500), (800, 400)], },
+            "straight": {"left": [(0, 600), (187, 500), (375, 400)], "right": [(800, 600), (613, 500), (425, 400)], }, }
+        return control_points.get(turn_name, control_points["straight"])
+
     def get_lane_positions(self, depth):
         """
         Calculates lane boundaries for a given depth.
         """
-        road_bottom_width = 750
-        road_top_width = 10
-        total_ratio = 3.2  # Ліва (1) + Центральна (1.2) + Права (1)
-        lane_ratios = [1, 1.2, 1]  # Відносна ширина смуг
+        current_control = self.calculate_control_points(self.current_turn)
+        next_control = self.calculate_control_points(self.next_turn)
 
-        # Ширина дороги на заданій глибині
-        width = road_bottom_width * (1 - min(depth, 1)) + road_top_width * max(depth - 1, 0)
+        # Interpolate control points between current and next turn
+        interpolated_left = [
+            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress) for i
+            in range(3)]
+        interpolated_right = [
+            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress) for
+            i in range(3)]
 
-        # Ширина кожної смуги
-        lane_widths = [width * (r / total_ratio) for r in lane_ratios]
+        # Calculate Bezier curve points for the given depth
+        t = min(depth, 1)
+        left_edge = self.bezier_point(t, *interpolated_left)
+        right_edge = self.bezier_point(t, *interpolated_right)
 
-        # Межі смуг
-        center_y = self.get_y_position(depth)  # Вертикальна координата
-        start_x = 400 - width // 2
-        lane_edges = [start_x]
-        for lane_width in lane_widths:
-            lane_edges.append(lane_edges[-1] + lane_width)
+        # Calculate lane edges
+        road_width = right_edge[0] - left_edge[0]
+        total_ratio = 3.2
+        lane_ratios = [1, 1.2, 1]
 
-        return lane_edges, center_y
+        lane_edges = [left_edge[0]]
+        for ratio in lane_ratios:
+            lane_edges.append(lane_edges[-1] + road_width * (ratio / total_ratio))
 
-    def get_y_position(self, depth):
+        return lane_edges, left_edge[1]
+
+    @staticmethod
+    def interpolate_points(p1, p2, t):
         """
-        Повертає координату `y` для об'єкта на основі глибини.
+        Interpolates two points `p1` and `p2` by parameter `t`.
         """
-        horizon_y = self.horizon_y
-        bottom_y = 600
-        return bottom_y - (bottom_y - horizon_y) * min(depth, 1)
+        return (1 - t) * p1[0] + t * p2[0], (1 - t) * p1[1] + t * p2[1],
 
     def update(self, speed, delta_time):
         self.offset += speed / 60
@@ -69,8 +94,9 @@ class Road:
             self.delay_timer += delta_time
             if self.delay_timer >= self.turn_delay:
                 self.current_turn = self.next_turn
+                print(f"Current Turn: {self.current_turn}")
                 self.next_turn = self.generate_turn()
-                print(f"New Turn: {self.next_turn}")
+                print(f"Next Turn: {self.next_turn}")
                 self.transition_progress = 0.0
                 self.delay_timer = 0.0
 
@@ -78,66 +104,17 @@ class Road:
             self.offset -= len(self.segments)
             self.segments.append(self.segments.pop(0))  # Rotate segments
 
-    @staticmethod
-    def get_control_points(turn_name):
-        """
-        Повертає опорні точки для даного типу повороту.
-        """
-        if turn_name == "hard_left":
-            left_start = (0, 600)
-            left_control = (300, 500)
-            left_end = (0, 400)
-            right_start = (800, 600)
-            right_control = (600, 400)
-            right_end = (150, 400)
-
-        elif turn_name == "long_left":
-            left_start = (0, 600)
-            left_control = (300, 500)
-            left_end = (220, 400)
-            right_start = (800, 600)
-            right_control = (500, 400)
-            right_end = (350, 400)
-
-        elif turn_name == "long_right":
-            left_start = (0, 600)
-            left_control = (300, 400)
-            left_end = (450, 400)
-            right_start = (800, 600)
-            right_control = (500, 500)
-            right_end = (580, 400)
-
-        elif turn_name == "hard_right":
-            left_start = (0, 600)
-            left_control = (200, 400)
-            left_end = (650, 400)
-            right_start = (800, 600)
-            right_control = (500, 500)
-            right_end = (800, 400)
-
-        else:
-            left_start = (0, 600)
-            left_control = (187, 500)
-            left_end = (375, 400)
-            right_start = (800, 600)
-            right_control = (613, 500)
-            right_end = (425, 400)
-
-        return (left_start, left_control, left_end), (right_start, right_control, right_end)
-
-    @staticmethod
-    def interpolate_points(p1, p2, t):
-        """
-        Інтерполює дві точки `p1` і `p2` за параметром `t`.
-        """
-        return (1 - t) * p1[0] + t * p2[0], (1 - t) * p1[1] + t * p2[1],
-
     def render(self, screen):
         """
-        Малює дорогу з вигнутими межами, використовуючи криві Безьє.
+        Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
         """
-        current_left, current_right = self.get_control_points(self.current_turn)
-        next_left, next_right = self.get_control_points(self.next_turn)
+        # Extract control points for the current and next turns
+        current_controls = self.calculate_control_points(self.current_turn)
+        next_controls = self.calculate_control_points(self.next_turn)
+
+        # Extract left and right control points from the dictionaries
+        current_left, current_right = current_controls["left"], current_controls["right"]
+        next_left, next_right = next_controls["left"], next_controls["right"]
 
         # Інтерполяція між контрольними точками
         interpolated_left = [
@@ -145,22 +122,29 @@ class Road:
         interpolated_right = [
             self.interpolate_points(current_right[i], next_right[i], self.transition_progress) for i in range(3)]
 
-        # Інтерполяція точок кривих Безьє
-        def bezier_point(t, p0, p1, p2):
-            """Розраховує точку на квадратичній кривій Безьє."""
-            return ((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
-                    (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
-
         # Розрахунок точок для лівої та правої меж
         num_segments = 50  # Кількість точок на кривій для плавності
-        left_curve = [bezier_point(t / num_segments, *interpolated_left) for t in range(num_segments + 1)]
-        right_curve = [bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
+        left_curve = [self.bezier_point(t / num_segments, *interpolated_left) for t in range(num_segments + 1)]
+        right_curve = [self.bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
 
-        # Малюємо дорогу як полігони між лівою та правою межею
+        # Розрахунок точок для центральних ліній (розділових смуг)
+        central_curve_left = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
+                               left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,) for i in
+                              range(len(left_curve))]
+
+        central_curve_right = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
+                                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,) for i in
+                               range(len(left_curve))]
+
+        # Draw road
         for i in range(num_segments):
-            pygame.draw.polygon(screen, self.road_color, [
-                left_curve[i],  # Ліва нижня точка
-                left_curve[i + 1],  # Ліва верхня точка
-                right_curve[i + 1],  # Права верхня точка
-                right_curve[i],  # Права нижня точка
-            ], )
+            pygame.draw.polygon(screen, self.road_color, [left_curve[i],  # Ліва нижня точка
+                                                          left_curve[i + 1],  # Ліва верхня точка
+                                                          right_curve[i + 1],  # Права верхня точка
+                                                          right_curve[i],  # Права нижня точка
+                                                          ], )
+
+        # Draw dividing lines for lanes
+        for i in range(num_segments):
+            pygame.draw.line(screen, self.lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
+            pygame.draw.line(screen, self.lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
