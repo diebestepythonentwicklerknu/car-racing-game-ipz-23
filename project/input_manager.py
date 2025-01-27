@@ -34,7 +34,7 @@ class InputManager:
         Перевіряє, чи натиснуто кнопку паузи, і повертає True лише один раз.
         """
         if self.pause_key_pressed and not self.pause_key_handled:
-            self.pause_key_handled = True  # Вказуємо, що Space вже оброблено
+            self.pause_key_handled = True  #Space вже оброблено
             return True
         return False
 

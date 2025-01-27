@@ -1,5 +1,6 @@
 import pygame
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from scoreboard import ScoreBoard
 import os
 
 
@@ -20,7 +21,8 @@ class Menu:
         # Кнопки (Поки 2, коли буде скорборд - додамо ще для цього)
         self.buttons = [
             {"text": "Start", "action": "start", "rect": pygame.Rect(250, 300, 300, 50)},
-            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 400, 300, 50)}
+            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 400, 300, 50)},
+            {"text": "ScoreBoard", "action": "quit", "rect": pygame.Rect(200, 500, 420, 70)}
         ]
 
         # Миготіння тексту
@@ -68,6 +70,8 @@ class Menu:
                         elif button["action"] == "quit":
                             pygame.quit()
                             exit()
+                        elif button["action"] == "scoreboard":
+                            self.show_scoreboard()
 
     def update(self):
         """
@@ -85,7 +89,7 @@ class Menu:
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
-
+            
             self.update()
             self.render()
             pygame.display.flip()
