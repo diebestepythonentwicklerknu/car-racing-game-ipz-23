@@ -6,7 +6,7 @@ class Obstacle:
         self.lane = lane
         self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
-        self.speed_factor = 0.008
+        self.speed_factor = 0.006
 
     def update(self, car_speed):
         """

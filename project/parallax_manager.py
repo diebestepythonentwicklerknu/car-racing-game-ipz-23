@@ -95,7 +95,7 @@ class Tree:
         """
         Update tree position and depth based on player speed and road curvature.
         """
-        speed_factor = 0.008  # Speed scaling factor
+        speed_factor = 0.012  # Speed scaling factor
 
         # Update depth based on speed
         self.depth -= speed_factor * (car_speed / 100)
@@ -121,3 +121,4 @@ class Tree:
                          (self.x + self.width // 3, self.y - self.height, self.width // 4, self.height))  # Trunk
         pygame.draw.ellipse(screen, color,
                             (self.x, self.y - self.height - self.width // 2, self.width, self.width))  # Crown
+
