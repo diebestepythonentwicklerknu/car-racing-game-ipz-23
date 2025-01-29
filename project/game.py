@@ -19,6 +19,13 @@ class Game:
         pygame.display.set_caption("Racing")
         self.clock = pygame.time.Clock()
         self.running = True
+<<<<<<< Updated upstream
+=======
+        self.paused = False  # Додаємо флаг для паузи
+        self.camera_offset_x = 0  # Зміщення камери (віртуальної)
+        self.show_scoreboard = False
+        self._initialize_game_components()
+>>>>>>> Stashed changes
 
         self.reset()
 

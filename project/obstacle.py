@@ -48,6 +48,10 @@ class Obstacle:
         self.lane = lane
         self.depth = 1  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
+<<<<<<< Updated upstream
+=======
+        self.speed_factor = 0.006
+>>>>>>> Stashed changes
 
     def update(self):
         """
