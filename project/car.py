@@ -81,6 +81,7 @@ class Car:
         elif self.steering_angle < 0:
             self.steering_angle = min(self.steering_angle + 0.1, 0)
 
+
     def update(self, road, delta_time):
         """
         Оновлення стану автомобіля.
@@ -139,6 +140,7 @@ class Car:
         """Інерція педалі газу (скидання обертів)"""
         if self.throttle > 0:
             self.throttle = max(self.throttle - 0.05, 0)
+
 
     def get_rect(self):
         """

@@ -1,25 +1,70 @@
+import random
+
 import pygame
+
+from constants import SCREEN_WIDTH, ROAD_HORIZON_Y, SCREEN_HEIGHT
 
 
 class ParallaxManager:
+    """
+    Class to handle the background (hills and trees).
+    """
 
-    """
-    Не зроблено, мертвий клас
-    """
     def __init__(self):
-        self.background_color = (100, 100, 255)  # Блакитне небо
-        self.hill_color = (34, 139, 34)  # Зелений (гори)
-        self.tree_color = (139, 69, 19)  # Коричневий (дерева)
+        self.background_color = (100, 100, 255)  # Sky blue
+        self.hill_color = (34, 139, 34)  # Green (hills)
+        self.tree_color = (139, 69, 19)  # Brown (trees)
 
-    def update(self, player_speed):
-        pass  # Простий фон, немає оновлення в цьому прикладі
+        # Array of trees (background objects)
+        self.trees = []
+
+    def update(self, player_speed, road):
+        """
+        Update the background based on player speed and road state.
+        """
+        if player_speed > 0:
+            # Update existing trees
+            for tree in self.trees:
+                tree.update(player_speed, road)
+
+            # Remove trees that are no longer visible
+            self.trees = [tree for tree in self.trees if tree.is_visible()]
+
+            if len(self.trees) < 5:
+                self.generate_trees(road)
+
+    def generate_trees(self, road):
+        # Generate new trees randomly if fewer than 5 are visible
+
+        side = random.choice(['left', 'right'])
+        if road.next_turn == "hard_left" and side == 'left':
+            return
+        if road.next_turn == "hard_right" and side == 'right':
+            return
+
+        # Generate trees relative to the road's curvature
+        depth = random.uniform(1.0, 1.2)
+        lane_edges, y_position = road.get_lane_positions(depth)
+        offset = random.randint(10, 100)  # Fixed offset range
+
+        if side == 'left':
+            if int(lane_edges[0]) - offset > 0:
+                position_x = random.randint(0, int(lane_edges[0]) - offset)
+            else:
+                return
+        elif int(lane_edges[-1]) + offset < SCREEN_WIDTH - 1:
+            position_x = random.randint(int(lane_edges[-1]) + offset, SCREEN_WIDTH)
+        else:
+            return
+
+        self.trees.append(Tree(position_x, side, depth, offset))
 
     def render(self, screen):
+        """
+        Малювання фону
+        """
         screen.fill(self.background_color)  # Небо
         pygame.draw.rect(screen, self.hill_color, (0, 400, 800, 200))  # Гори
-<<<<<<< Updated upstream
-        pygame.draw.rect(screen, self.tree_color, (100, 450, 50, 100))  # Дерева
-=======
         for tree in self.trees:
             tree.render(screen, self.tree_color)
 
@@ -76,4 +121,4 @@ class Tree:
                          (self.x + self.width // 3, self.y - self.height, self.width // 4, self.height))  # Trunk
         pygame.draw.ellipse(screen, color,
                             (self.x, self.y - self.height - self.width // 2, self.width, self.width))  # Crown
->>>>>>> Stashed changes
+
