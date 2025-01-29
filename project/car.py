@@ -34,26 +34,53 @@ class Car:
         self.wheelbase = wheelbase  # Колісна база автомобіля в метрах
         self.steering_angle = 0  # Кут повороту керма
 
+    def get_steering_factor(self):
+        """
+        Визначає, наскільки швидко повертається кермо залежно від швидкості.
+        На середніх швидкостях (50-100 км/год) повороти найшвидші.
+        """
+        return max(1.5, 2 - abs(self.speed - 200) / 150)  # Максимальна чутливість при 80 км/год
+
+    def get_max_steering_angle(self):
+        """
+        Обмежує кут повороту залежно від швидкості (understeering).
+        """
+        return max(10, 20 - (self.speed / 60))  # При 300 км/год макс кут = 10°
+
     def move_left(self):
         """
-        Повертає кермо вліво.
+        Плавний поворот вліво із обмеженням кута повороту.
         """
-        self.steering_angle = max(self.steering_angle - 2, -15)
+        steering_factor = self.get_steering_factor()
+        max_angle = self.get_max_steering_angle()
+        self.steering_angle = max(self.steering_angle - steering_factor, -max_angle)
 
     def move_right(self):
         """
-        Повертає кермо вправо.
+        Плавний поворот вправо із обмеженням кута повороту.
         """
-        self.steering_angle = min(self.steering_angle + 2, 15)
+        steering_factor = self.get_steering_factor()
+        max_angle = self.get_max_steering_angle()
+        self.steering_angle = min(self.steering_angle + steering_factor, max_angle)
 
     def reset_steering(self):
         """
         Повертає кермо в початкове положення, коли клавіші не натиснуті.
         """
         if self.steering_angle > 0:
-            self.steering_angle = max(self.steering_angle - 1, 0)
+            self.steering_angle = max(self.steering_angle - 0.81, 0)
         elif self.steering_angle < 0:
-            self.steering_angle = min(self.steering_angle + 1, 0)
+            self.steering_angle = min(self.steering_angle + 0.81, 0)
+
+    def update_steering(self):
+        """
+        Додає інерцію: кермо не змінює напрямок миттєво.
+        """
+        if self.steering_angle > 0:
+            self.steering_angle = max(self.steering_angle - 0.1, 0)
+        elif self.steering_angle < 0:
+            self.steering_angle = min(self.steering_angle + 0.1, 0)
+
 
     def update(self, road, delta_time):
         """
@@ -107,12 +134,13 @@ class Car:
         Сповільнення через інерцію при відсутності натискання клавіш.
         """
         if self.speed > 0:
-            self.speed = max(self.speed - 0.01, 0)  # Плавне сповільнення
+            self.speed = max(self.speed - 0.05, 0)  # Плавне сповільнення
 
     def throttle_inertia(self):
         """Інерція педалі газу (скидання обертів)"""
         if self.throttle > 0:
-            self.throttle = max(self.throttle - 0.01, 0)
+            self.throttle = max(self.throttle - 0.05, 0)
+
 
     def get_rect(self):
         """

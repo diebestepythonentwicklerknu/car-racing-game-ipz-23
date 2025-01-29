@@ -19,6 +19,7 @@ class Game:
         self.running = True
         self.paused = False  # Додаємо флаг для паузи
         self.show_scoreboard = False
+        self.camera_offset_x = 0  # Зміщення камери (віртуальної)
         self._initialize_game_components()
 
     def _initialize_game_components(self):
