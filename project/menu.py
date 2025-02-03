@@ -8,6 +8,7 @@ class Menu:
     def __init__(self, screen):
         self.screen = screen
         self.running = True
+        self.nickname = None
         pygame.display.set_caption("Menu")
 
         # Завантаження ретро-фону з файлу (в каталозі проєкту)
@@ -18,11 +19,12 @@ class Menu:
         self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 40)
         self.title_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 36)
 
-        # Кнопки (Поки 2, коли буде скорборд - додамо ще для цього)
-        self.buttons = [
-            {"text": "Start", "action": "start", "rect": pygame.Rect(250, 300, 300, 50)},
-            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 400, 300, 50)},
-            {"text": "ScoreBoard", "action": "quit", "rect": pygame.Rect(200, 500, 420, 70)}
+        # Fix : added Scoreboard button
+        self.buttons = [   
+            {"text": "Play as Guest", "action": "guest", "rect": pygame.Rect(130, 250, 550, 50)},
+            {"text": "Play with Nickname", "action": "nickname", "rect": pygame.Rect(30, 320, 750, 60)},
+            {"text": "ScoreBoard", "action": "scoreboard", "rect": pygame.Rect(180, 390, 430, 50)},
+            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 460, 300, 50)}
         ]
 
         # Миготіння тексту
@@ -46,8 +48,7 @@ class Menu:
         # Малюємо кнопки
         for button in self.buttons:
 
-            #  button_rect = button["rect"].move(50, 0)
-            pygame.draw.rect(self.screen, (0, 0, 0), button["rect"])  # Чорний фон
+            pygame.draw.rect(self.screen, (0, 0, 0), button["rect"])  
             pygame.draw.rect(self.screen, (255, 255, 255), button["rect"], 3)  # Білий контур навколо кнопки
             text = self.font.render(button["text"], True, (255, 255, 255))
             text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Текст по центру кнопки
@@ -61,17 +62,80 @@ class Menu:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:  # Ліва кнопка миші
-                for button in self.buttons:
-                    if button["rect"].collidepoint(event.pos):
-                        if button["action"] == "start":
-                            self.running = False  # Вихід з меню, початок гри
-                        elif button["action"] == "quit":
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:             
+            for button in self.buttons:
+                if button["rect"].collidepoint(event.pos):
+                    if button["action"] == "guest":
+                            self.running = False  # Guest mode
+                    elif button["action"] == "nickname":
+                         self.enter_nickname() 
+                    elif button["action"] == "quit":
                             pygame.quit()
                             exit()
-                        elif button["action"] == "scoreboard":
+                    elif button["action"] == "scoreboard":
                             self.show_scoreboard()
+
+    def enter_nickname(self):
+        """Дозволяє користувачеві ввести нікнейм перед грою."""
+        nickname = ""
+        font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 24)
+    
+        while True:
+            self.screen.fill((0, 0, 0))
+            prompt = font.render("Enter your nickname:", True, (255, 255, 255))
+            self.screen.blit(prompt, (SCREEN_WIDTH // 2 - prompt.get_width() // 2, 200))
+
+            nickname_surface = font.render(nickname, True, (255, 255, 0))
+            self.screen.blit(nickname_surface, (SCREEN_WIDTH // 2 - nickname_surface.get_width() // 2, 250))
+        
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN and nickname.strip():
+                        self.running = False
+                        self.nickname = nickname.strip()  # Зберігаємо нікнейм для гри
+                        return
+                    elif event.key == pygame.K_BACKSPACE:
+                        nickname = nickname[:-1]
+                    elif event.unicode.isalnum():
+                        nickname += event.unicode
+
+    def show_scoreboard(self):
+        """Показує топ-10 гравців"""
+        scoreboard = ScoreBoard()
+        top_scores = scoreboard.get_top_scores()
+
+        font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 24)
+        back_button = pygame.Rect(250, 500, 300, 50)
+
+        while True:
+            self.screen.fill((0, 0, 0))
+            title = font.render("Scoreboard", True, (255, 255, 255))
+            self.screen.blit(title, (SCREEN_WIDTH // 2 - title.get_width() // 2, 50))
+
+            y_offset = 120
+            for i, (name, score) in enumerate(top_scores):
+                text = font.render(f"{i+1}. {name}: {score}", True, (255, 255, 0))
+                self.screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
+                y_offset += 40
+
+            pygame.draw.rect(self.screen, (255, 0, 0), back_button)
+            back_text = font.render("Back", True, (255, 255, 255))
+            self.screen.blit(back_text, (back_button.x + 100, back_button.y + 10))
+        
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if back_button.collidepoint(event.pos):
+                        return
 
     def update(self):
         """
@@ -86,6 +150,9 @@ class Menu:
         """
         Основний цикл меню.
         """
+        if self.nickname is None:
+            self.nickname = "Guest"
+            
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
