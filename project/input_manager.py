@@ -12,6 +12,7 @@ class InputManager:
                         pygame.K_UP: 'accelerate',
                         pygame.K_DOWN: 'brake', }
         self.pressed_keys = set()
+        self.unpressed_keys = set()
         self.pause_key_pressed = False
         self.pause_key_handled = False  # Для обробки натискання Space один раз
 
@@ -25,6 +26,7 @@ class InputManager:
                 self.pause_key_pressed = True
         elif event.type == pygame.KEYUP:
             self.pressed_keys.discard(event.key)
+            self.unpressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
                 self.pause_key_pressed = False
                 self.pause_key_handled = False  # Дозволяємо повторну обробку Space
@@ -44,12 +46,22 @@ class InputManager:
         """
         if pygame.K_LEFT in self.pressed_keys:
             car.move_left()
+            car.isTurningLeft = True
+        else:
+            car.isTurningLeft = False
+
         if pygame.K_RIGHT in self.pressed_keys:
             car.move_right()
+            car.isTurningRight = True
+        else:
+            car.isTurningRight = False
+
         if pygame.K_UP in self.pressed_keys:
             car.increase_throttle()
         elif pygame.K_DOWN in self.pressed_keys:
             car.decrease_throttle()
+            car.isStopping = True;
         else:
             car.apply_inertia()
             car.throttle_inertia()
+            car.isStopping = False;

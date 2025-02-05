@@ -1,51 +1,52 @@
 import os
-import pygame
-
 
 class ScoreBoard:
-    """
-    Клас для відображення таблиці найкращих результатів.
-    """
-    def __init__(self, file_path="scoreboard.txt"):
-        self.file_path = file_path
-        self.top_scores = self._load_scores()
-        self.font = pygame.font.Font(None, 36)  # Шрифт для тексту
-        self.color = (255, 255, 255)  # Колір тексту
+    FILE_PATH = os.path.join(os.path.dirname(__file__), "players_scoreboard.txt")
 
-    def _load_scores(self):
-        """
-        Завантажує найкращі результати з файлу.
-        """
-        if not os.path.exists(self.file_path):
-            return []
-        with open(self.file_path, "r") as file:
-            scores = [int(line.strip()) for line in file.readlines()]
-        return sorted(scores, reverse=True)[:5]  # Топ-5 результатів
+    def __init__(self):
+        self.scores = self.load_scores()
 
-    def _save_scores(self):
+    def load_scores(self):
         """
-        Зберігає найкращі результати у файл.
+        Завантажує результати з текстового файлу або створює новий файл
         """
-        with open(self.file_path, "w") as file:
-            for score in self.top_scores:
-                file.write(f"{score}\n")
+        scores = {}
 
-    def add_score(self, score):
-        """
-        Додає новий результат і оновлює таблицю.
-        """
-        self.top_scores.append(score)
-        self.top_scores = sorted(self.top_scores, reverse=True)[:5]
-        self._save_scores()
+        if os.path.exists(self.FILE_PATH):
+            with open(self.FILE_PATH, "r", encoding="utf-8") as file:
+                for line in file:
+                    parts = line.strip().split()
+                    if len(parts) == 2 and parts[1].isdigit():  # Перевірка правильного формату
+                        nickname, score = parts[0], int(parts[1])
+                        scores[nickname] = score
+        else:
+            open(self.FILE_PATH, "w").close()
 
-    def render(self, screen):
-        """
-        Відображає таблицю найкращих результатів на екрані.
-        """
-        screen.fill((0, 0, 0))  # Чорний фон
-        title = self.font.render("ScoreBoard", True, self.color)
-        screen.blit(title, (200, 50))  # Заголовок
+        return scores
 
-        for i, score in enumerate(self.top_scores):
-            text = self.font.render(f"{i + 1}. {score}", True, self.color)
-            screen.blit(text, (200, 100 + i * 40))  # Відображення кожного результату
+    def save_scores(self):
+        """
+        Зберігає оновлені результати у текстовий файл.
+        """
+        with open(self.FILE_PATH, "w", encoding="utf-8") as file:
+            for nickname, score in self.scores.items():
+                file.write(f"{nickname} {score}\n")
+
+
+    def update_score(self, nickname, score):
+        """
+        Оновлює найкращий результат гравця, якщо новий результат більший.
+        Якщо гравця ще немає в таблиці, додає його.
+        """
+        if nickname != "Guest":  # Гравці без нікнейму не зберігаються
+            if nickname in self.scores:
+                if score > self.scores[nickname]:  
+                    self.scores[nickname] = score
+            else:
+                self.scores[nickname] = score  
+
+            self.save_scores()
+
+    def get_top_scores(self, top_n=10):
+        """Повертає список топ-N найкращих результатів."""
+        return sorted(self.scores.items(), key=lambda x: x[1], reverse=True)[:top_n]

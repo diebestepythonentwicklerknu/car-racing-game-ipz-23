@@ -1,31 +1,34 @@
 import math
-
 import pygame
 
-from constants import SCREEN_WIDTH
-
+from constants import CAR_POSITION, CAR_SIZE
+from utils.sprite_manager import SpriteManager
 
 class Car:
     """
-    Клас автомобіля
+    Player car class
     """
-
-    def __init__(self, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
-        self.x = SCREEN_WIDTH // 2  # Початкове положення по горизонталі
-        self.y = 500  # Початкове положення по вертикалі
-        self.width = 120
-        self.height = 60
-        self.color = (255, 0, 0)  # Колір автомобіля
-        self.speed = 0  # Початкова швидкість
-        self.throttle = 0  # Рівень натискання газу (0.0 - 1.0)
+    def __init__(self, sprites, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
+        self.isTurningLeft = False;
+        self.isTurningRight = False;
+        self.isStopping = False;
+        
+        self.x = CAR_POSITION[0]
+        self.y = CAR_POSITION[1]
+        self.width = CAR_SIZE[0];
+        self.height = CAR_SIZE[1];
+        self.current_sprite_frame = 0;
+        self.sprites = sprites;
+        self.speed = 0 
+        self.throttle = 0
         self.min_speed = 0
         self.max_speed = max_speed
-        self.target_x = self.x  # Позиція, до якої автомобіль рухається
-        self.max_offset = 245  # Максимальна відстань, на яку можна повернути
-        self.road_center = SCREEN_WIDTH // 2
-        self.font = pygame.font.Font(None, 26)
+        self.target_x = self.x  # Car's start position
+        self.max_offset = 245
+        self.road_center = CAR_POSITION[0]
+        self.font = pygame.font.Font(None, 26);
 
-        # Фізичні параметри
+        # Car characteristics
         self.mass = mass  # Маса автомобіля в кг
         self.max_power = max_power  # Максимальна потужність в Вт
         self.drag_coefficient = drag_coefficient
@@ -83,18 +86,18 @@ class Car:
 
 
     def update(self, road, delta_time):
-        """
-        Оновлення стану автомобіля.
-        """
+        '''
+        Updates car's state based on road conditions and user input.
+        '''
         self._update_speed()
         self._update_position()
         self.apply_road_force(road, delta_time)
         self.reset_steering()
 
     def render(self, screen):
-        """
-        Малює автомобіль на екрані.
-        """
+        '''
+        Renders car
+        '''
         italic_font = self.font
         italic_font.set_italic(True)
         speed_text = italic_font.render(f"Speed: {self.speed:.0f} km/h", True, (102, 10, 5))
@@ -106,13 +109,46 @@ class Car:
             screen.blit(outline_text, (10 + offset[0], 580 + offset[1]))
 
         screen.blit(speed_text, (10, 580))
-        pygame.draw.rect(screen, self.color, (self.x - self.width // 2, self.y, self.width, self.height))
+        
+        self.update_car_sprite()
+        screen.blit(self.sprites[int(self.current_sprite_frame // 5)], (self.x - self.width, self.y, self.width, self.height));
+        
+        #Uncomment to draw car hitbox
+        #pygame.draw.rect(screen, (0, 0, 0), (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1)
 
+    def update_car_sprite(self):
+        '''
+        Updates car sprites based on the current state
+        '''
+        if (self.isTurningLeft):
+            if (self.current_sprite_frame + 1 >= 50 or self.current_sprite_frame < 35):
+                self.current_sprite_frame = 35
+            self.current_sprite_frame += 1
+        elif (self.isTurningRight):
+            if (self.current_sprite_frame + 1 >= 35 or self.current_sprite_frame < 20):
+                self.current_sprite_frame = 20
+            self.current_sprite_frame += 1
+        elif (self.isStopping):
+            if (self.current_sprite_frame + 1 >= 20):
+                self.current_sprite_frame = 0
+            if (self.speed > 100):
+                self.current_sprite_frame += 1
+            else:
+                self.current_sprite_frame = self.current_sprite_frame + 0.5
+        elif (self.speed > 0):
+            if (self.current_sprite_frame + 1 >= 70 or self.current_sprite_frame < 55):
+                self.current_sprite_frame = 55
+            self.current_sprite_frame += 1
+        else:
+            self.current_sprite_frame = 0
+    
+    
     def increase_throttle(self):
         """
         Збільшує газ до максимуму (1.0).
         """
         self.throttle = min(self.throttle + 0.1, 1.0)
+        
 
     def decrease_throttle(self):
         """
@@ -121,6 +157,7 @@ class Car:
         self.throttle = max(self.throttle - 0.1, 0.0)
         if self.throttle == 0:
             self.decrease_speed()
+        
 
     def decrease_speed(self):
         """
@@ -146,7 +183,7 @@ class Car:
         """
         Повертає прямокутник автомобіля для перевірки зіткнень.
         """
-        return pygame.Rect(self.x - self.width // 2, self.y, self.width, self.height)
+        return pygame.Rect(self.x - self.width // 2, self.y + self.height // 2, self.width, self.height)
 
     def apply_road_force(self, road, delta_time):
         """
@@ -210,17 +247,8 @@ class Car:
             self.x += angular_velocity * radius * math.sin(math.radians(self.steering_angle))
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
-
-
-class LamborghiniDiablo(Car):
+class Ferrari458Italia(Car):
     def __init__(self):
-        super().__init__(max_speed=322, mass=1576, max_power=367000, drag_coefficient=0.31, frontal_area=2.0,
-                         wheelbase=2.65)
-        self.color = (255, 215, 0)  # Жовтий Lamborghini
-
-
-class FerrariF40(Car):
-    def __init__(self):
-        super().__init__(max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
-                         wheelbase=2.45)
-        self.color = (255, 0, 0)  # Червоний Ferrari
+        carSprites = SpriteManager.get_frame_sequence('car_full.png', 64, 24, 4);
+        super().__init__(carSprites, max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
+                        wheelbase=2.45)
