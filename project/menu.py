@@ -1,9 +1,10 @@
-import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_PADDING
-from scoreboard import ScoreBoard
-from utils.sprite_manager import SpriteManager
 import os
 
+import pygame
+
+from constants import SCREEN_WIDTH, BUTTON_WIDTH, BUTTON_HEIGHT
+from scoreboard import ScoreBoard
+from utils.sprite_manager import SpriteManager
 
 
 class Menu:
@@ -16,11 +17,15 @@ class Menu:
         self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
 
         # Fix : added Scoreboard button
-        self.buttons = [   
-            {"text": "Play as Guest", "action": "guest", "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 300, BUTTON_WIDTH, BUTTON_HEIGHT)},
-            {"text": "Login", "action": "nickname", "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 360, BUTTON_WIDTH, BUTTON_HEIGHT)},
-            {"text": "ScoreBoard", "action": "scoreboard", "rect": pygame.Rect((SCREEN_WIDTH - 250) // 2, 420, BUTTON_WIDTH, BUTTON_HEIGHT)},
-            {"text": "Quit", "action": "quit", "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 480, BUTTON_WIDTH, BUTTON_HEIGHT)}
+        self.buttons = [
+            {"text": "Play as Guest", "action": "guest",
+             "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 300, BUTTON_WIDTH, BUTTON_HEIGHT)},
+            {"text": "Login", "action": "nickname",
+             "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 360, BUTTON_WIDTH, BUTTON_HEIGHT)},
+            {"text": "ScoreBoard", "action": "scoreboard",
+             "rect": pygame.Rect((SCREEN_WIDTH - 250) // 2, 420, BUTTON_WIDTH, BUTTON_HEIGHT)},
+            {"text": "Quit", "action": "quit",
+             "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 480, BUTTON_WIDTH, BUTTON_HEIGHT)}
         ]
 
         # # Миготіння тексту
@@ -43,8 +48,7 @@ class Menu:
 
         # Малюємо кнопки
         for button in self.buttons:
-
-            pygame.draw.rect(self.screen, (0, 0, 0), button["rect"])  
+            pygame.draw.rect(self.screen, (0, 0, 0), button["rect"])
             pygame.draw.rect(self.screen, (255, 255, 255), button["rect"], 3)  # Білий контур навколо кнопки
             text = self.font.render(button["text"], True, (255, 255, 255))
             text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Текст по центру кнопки
@@ -58,24 +62,24 @@ class Menu:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:             
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for button in self.buttons:
                 if button["rect"].collidepoint(event.pos):
                     if button["action"] == "guest":
-                            self.running = False  # Guest mode
+                        self.running = False  # Guest mode
                     elif button["action"] == "nickname":
-                         self.enter_nickname() 
+                        self.enter_nickname()
                     elif button["action"] == "quit":
-                            pygame.quit()
-                            exit()
+                        pygame.quit()
+                        exit()
                     elif button["action"] == "scoreboard":
-                            self.show_scoreboard()
+                        self.show_scoreboard()
 
     def enter_nickname(self):
         """Дозволяє користувачеві ввести нікнейм перед грою."""
         nickname = ""
         font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 24)
-    
+
         while True:
             self.screen.fill((0, 0, 0))
             prompt = font.render("Enter your nickname:", True, (255, 255, 255))
@@ -83,7 +87,7 @@ class Menu:
 
             nickname_surface = font.render(nickname, True, (255, 255, 0))
             self.screen.blit(nickname_surface, (SCREEN_WIDTH // 2 - nickname_surface.get_width() // 2, 250))
-        
+
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -115,14 +119,14 @@ class Menu:
 
             y_offset = 120
             for i, (name, score) in enumerate(top_scores):
-                text = font.render(f"{i+1}. {name}: {score}", True, (255, 255, 0))
+                text = font.render(f"{i + 1}. {name}: {score}", True, (255, 255, 0))
                 self.screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
                 y_offset += 40
 
             pygame.draw.rect(self.screen, (255, 0, 0), back_button)
             back_text = font.render("Back", True, (255, 255, 255))
             self.screen.blit(back_text, (back_button.x + 100, back_button.y + 10))
-        
+
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -148,11 +152,11 @@ class Menu:
         """
         if self.nickname is None:
             self.nickname = "Guest"
-            
+
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
-            
+
             # self.update()
             self.render()
             pygame.display.flip()
