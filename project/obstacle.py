@@ -1,6 +1,8 @@
 import pygame
+
+from utils.sprite_constants import OBSTACLE_RATIO
 from utils.sprite_manager import SpriteManager
-from utils.sprite_constants import OBSTACLE_RATIO;
+
 
 class Obstacle:
     def __init__(self, lane, depth=1):
@@ -62,12 +64,11 @@ class Obstacle:
         """
         Малює перешкоду на екрані.
         """
-        
-        rect = self.get_rect(road)
-        scaledImage = pygame.transform.scale(self.sprite, (rect.width, rect.height))
-        screen.blit(scaledImage, rect);
 
-        
+        rect = self.get_rect(road)
+        scaled_image = pygame.transform.scale(self.sprite, (rect.width, rect.height))
+        screen.blit(scaled_image, rect)
+
         # Відмалювання хітбокса (Для тесту розкоментити)
         # reduced_rect = self.get_reduced_rect(road)
         # pygame.draw.rect(screen, (100, 199, 100), reduced_rect, 1)

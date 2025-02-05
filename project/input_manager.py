@@ -7,9 +7,7 @@ class InputManager:
     """
 
     def __init__(self):
-        self.actions = {pygame.K_LEFT: 'left',
-                        pygame.K_RIGHT: 'right',
-                        pygame.K_UP: 'accelerate',
+        self.actions = {pygame.K_LEFT: 'left', pygame.K_RIGHT: 'right', pygame.K_UP: 'accelerate',
                         pygame.K_DOWN: 'brake', }
         self.pressed_keys = set()
         self.unpressed_keys = set()
@@ -36,7 +34,7 @@ class InputManager:
         Перевіряє, чи натиснуто кнопку паузи, і повертає True лише один раз.
         """
         if self.pause_key_pressed and not self.pause_key_handled:
-            self.pause_key_handled = True  #Space вже оброблено
+            self.pause_key_handled = True  # Space вже оброблено
             return True
         return False
 
@@ -60,8 +58,8 @@ class InputManager:
             car.increase_throttle()
         elif pygame.K_DOWN in self.pressed_keys:
             car.decrease_throttle()
-            car.isStopping = True;
+            car.isStopping = True
         else:
             car.apply_inertia()
             car.throttle_inertia()
-            car.isStopping = False;
+            car.isStopping = False
