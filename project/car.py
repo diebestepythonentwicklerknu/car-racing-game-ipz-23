@@ -1,38 +1,34 @@
 import math
-
 import pygame
 
-from constants import SCREEN_WIDTH
+from constants import CAR_POSITION, CAR_SIZE
 from utils.sprite_manager import SpriteManager
-
 
 class Car:
     """
-    Клас автомобіля
+    Player car class
     """
     def __init__(self, sprites, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
         self.isTurningLeft = False;
         self.isTurningRight = False;
         self.isStopping = False;
         
-        self.x = SCREEN_WIDTH // 2  # Початкове положення по горизонталі
-        self.y = 500  # Початкове положення по вертикалі
-        self.width = 128;
-        self.height = 48;
+        self.x = CAR_POSITION[0]
+        self.y = CAR_POSITION[1]
+        self.width = CAR_SIZE[0];
+        self.height = CAR_SIZE[1];
+        self.current_sprite_frame = 0;
         self.sprites = sprites;
-        self.currentSprite = sprites[11];
-        self.spriteFrame = 0;
-        self.color = (255, 0, 0)  # Колір автомобіля
-        self.speed = 0  # Початкова швидкість
-        self.throttle = 0  # Рівень натискання газу (0.0 - 1.0)
+        self.speed = 0 
+        self.throttle = 0
         self.min_speed = 0
         self.max_speed = max_speed
-        self.target_x = self.x  # Позиція, до якої автомобіль рухається
-        self.max_offset = 245  # Максимальна відстань, на яку можна повернути
-        self.road_center = SCREEN_WIDTH // 2
+        self.target_x = self.x  # Car's start position
+        self.max_offset = 245
+        self.road_center = CAR_POSITION[0]
         self.font = pygame.font.Font(None, 26);
 
-        # Фізичні параметри
+        # Car characteristics
         self.mass = mass  # Маса автомобіля в кг
         self.max_power = max_power  # Максимальна потужність в Вт
         self.drag_coefficient = drag_coefficient
@@ -41,40 +37,67 @@ class Car:
         self.wheelbase = wheelbase  # Колісна база автомобіля в метрах
         self.steering_angle = 0  # Кут повороту керма
 
+    def get_steering_factor(self):
+        """
+        Визначає, наскільки швидко повертається кермо залежно від швидкості.
+        На середніх швидкостях (50-100 км/год) повороти найшвидші.
+        """
+        return max(1.5, 2 - abs(self.speed - 200) / 150)  # Максимальна чутливість при 80 км/год
+
+    def get_max_steering_angle(self):
+        """
+        Обмежує кут повороту залежно від швидкості (understeering).
+        """
+        return max(10, 20 - (self.speed / 60))  # При 300 км/год макс кут = 10°
+
     def move_left(self):
         """
-        Повертає кермо вліво.
+        Плавний поворот вліво із обмеженням кута повороту.
         """
-        self.steering_angle = max(self.steering_angle - 2, -15)
+        steering_factor = self.get_steering_factor()
+        max_angle = self.get_max_steering_angle()
+        self.steering_angle = max(self.steering_angle - steering_factor, -max_angle)
 
     def move_right(self):
         """
-        Повертає кермо вправо.
+        Плавний поворот вправо із обмеженням кута повороту.
         """
-        self.steering_angle = min(self.steering_angle + 2, 15)
+        steering_factor = self.get_steering_factor()
+        max_angle = self.get_max_steering_angle()
+        self.steering_angle = min(self.steering_angle + steering_factor, max_angle)
 
     def reset_steering(self):
         """
         Повертає кермо в початкове положення, коли клавіші не натиснуті.
         """
         if self.steering_angle > 0:
-            self.steering_angle = max(self.steering_angle - 1, 0)
+            self.steering_angle = max(self.steering_angle - 0.81, 0)
         elif self.steering_angle < 0:
-            self.steering_angle = min(self.steering_angle + 1, 0)
+            self.steering_angle = min(self.steering_angle + 0.81, 0)
+
+    def update_steering(self):
+        """
+        Додає інерцію: кермо не змінює напрямок миттєво.
+        """
+        if self.steering_angle > 0:
+            self.steering_angle = max(self.steering_angle - 0.1, 0)
+        elif self.steering_angle < 0:
+            self.steering_angle = min(self.steering_angle + 0.1, 0)
+
 
     def update(self, road, delta_time):
-        """
-        Оновлення стану автомобіля.
-        """
+        '''
+        Updates car's state based on road conditions and user input.
+        '''
         self._update_speed()
         self._update_position()
         self.apply_road_force(road, delta_time)
         self.reset_steering()
 
     def render(self, screen):
-        """
-        Малює автомобіль на екрані.
-        """
+        '''
+        Renders car
+        '''
         italic_font = self.font
         italic_font.set_italic(True)
         speed_text = italic_font.render(f"Speed: {self.speed:.0f} km/h", True, (102, 10, 5))
@@ -87,41 +110,39 @@ class Car:
 
         screen.blit(speed_text, (10, 580))
         
-        if (self.isTurningLeft):
-            if (self.spriteFrame + 1 >= 50 or self.spriteFrame < 35):
-                self.spriteFrame = 35
-            
-            self.currentSprite = self.sprites[self.spriteFrame // 5];
-            self.spriteFrame += 1
-            
-        elif (self.isTurningRight):
-            if (self.spriteFrame + 1 >= 35 or self.spriteFrame < 20):
-                self.spriteFrame = 20
-            
-            self.currentSprite = self.sprites[self.spriteFrame // 5];
-            self.spriteFrame += 1
-        elif (self.isStopping):
-            if (self.spriteFrame + 1 >= 20):
-                self.spriteFrame = 0;
-                
-            self.currentSprite = self.sprites[int(self.spriteFrame // 5)];
-            
-            if (self.speed > 100):
-                self.spriteFrame += 1;
-            else:
-                self.spriteFrame = self.spriteFrame + 0.5;
-        elif (self.speed > 0):
-            if (self.spriteFrame + 1 >= 70 or self.spriteFrame < 55):
-                self.spriteFrame = 55;
-            
-            self.currentSprite = self.sprites[self.spriteFrame // 5];
-            self.spriteFrame += 1;
-        else:
-            self.currentSprite = self.sprites[0];
+        self.update_car_sprite()
+        screen.blit(self.sprites[int(self.current_sprite_frame // 5)], (self.x - self.width, self.y, self.width, self.height));
         
-        screen.blit(self.currentSprite, (self.x - self.width, self.y, self.width, self.height));
-        pygame.draw.rect(screen, (0, 0, 0), (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1)
+        #Uncomment to draw car hitbox
+        #pygame.draw.rect(screen, (0, 0, 0), (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1)
 
+    def update_car_sprite(self):
+        '''
+        Updates car sprites based on the current state
+        '''
+        if (self.isTurningLeft):
+            if (self.current_sprite_frame + 1 >= 50 or self.current_sprite_frame < 35):
+                self.current_sprite_frame = 35
+            self.current_sprite_frame += 1
+        elif (self.isTurningRight):
+            if (self.current_sprite_frame + 1 >= 35 or self.current_sprite_frame < 20):
+                self.current_sprite_frame = 20
+            self.current_sprite_frame += 1
+        elif (self.isStopping):
+            if (self.current_sprite_frame + 1 >= 20):
+                self.current_sprite_frame = 0
+            if (self.speed > 100):
+                self.current_sprite_frame += 1
+            else:
+                self.current_sprite_frame = self.current_sprite_frame + 0.5
+        elif (self.speed > 0):
+            if (self.current_sprite_frame + 1 >= 70 or self.current_sprite_frame < 55):
+                self.current_sprite_frame = 55
+            self.current_sprite_frame += 1
+        else:
+            self.current_sprite_frame = 0
+    
+    
     def increase_throttle(self):
         """
         Збільшує газ до максимуму (1.0).
@@ -150,12 +171,13 @@ class Car:
         Сповільнення через інерцію при відсутності натискання клавіш.
         """
         if self.speed > 0:
-            self.speed = max(self.speed - 0.01, 0)  # Плавне сповільнення
+            self.speed = max(self.speed - 0.05, 0)  # Плавне сповільнення
 
     def throttle_inertia(self):
         """Інерція педалі газу (скидання обертів)"""
         if self.throttle > 0:
-            self.throttle = max(self.throttle - 0.01, 0)
+            self.throttle = max(self.throttle - 0.05, 0)
+
 
     def get_rect(self):
         """
@@ -225,29 +247,8 @@ class Car:
             self.x += angular_velocity * radius * math.sin(math.radians(self.steering_angle))
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
-
-
-class LamborghiniDiablo(Car):
-    def __init__(self):
-        super().__init__(max_speed=322, mass=1576, max_power=367000, drag_coefficient=0.31, frontal_area=2.0, wheelbase=2.65)
-        self.color = (255, 215, 0)  # Жовтий Lamborghini
-
-
-class FerrariF40(Car):
-    def __init__(self):
-        super().__init__(max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
-                        wheelbase=2.45)
-        self.color = (255, 0, 0)  # Червоний Ferrari
-        
 class Ferrari458Italia(Car):
     def __init__(self):
-        carImg = SpriteManager.loadImage('car_full.png');
-        carSprites = []
-        # carSprite = SpriteManager.getFrame(carImg, 0, 64, 24)
-        for i in range(0, 14):
-            carSprites.append(SpriteManager.getFrame(carImg, i, 64, 24))
-        
-        print(carSprites);
+        carSprites = SpriteManager.get_frame_sequence('car_full.png', 64, 24, 4);
         super().__init__(carSprites, max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
                         wheelbase=2.45)
-        self.color = (255, 0, 0)  # Ferrari 458 Italia

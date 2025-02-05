@@ -7,8 +7,8 @@ class Obstacle:
         self.lane = lane
         self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
-        self.speed_factor = 0.008
-        self.sprite = SpriteManager.loadImage('obstacle.png')
+        self.speed_factor = 0.006
+        self.sprite = SpriteManager.load_image('obstacle.png')
 
     def update(self, car_speed):
         """
@@ -28,14 +28,35 @@ class Obstacle:
 
     def get_reduced_rect(self, road):
         """
-        Обчислення хітбоксу, меншого за візул
+        Обчислення хітбоксу, меншого за візуал
         :param road:
         :return:
         """
         rect = self.get_rect(road)
-        reduced_width = rect.width // 2
-        reduced_height = rect.height // 2
-        return pygame.Rect(rect.x + rect.width // 4, rect.y + rect.height // 4, reduced_width, reduced_height)
+        reduced_width = int(rect.width * 0.8)
+        reduced_height = int(rect.height * 0.8)
+        return pygame.Rect(
+            rect.x + (rect.width - reduced_width) // 2,
+            rect.y + (rect.height - reduced_height) // 2,
+            reduced_width, reduced_height
+        )
+
+    def get_increased_rect(self, road):
+        """
+        Обчислення хітбоксу, більшого за візуал
+        Використовується для близького обгону
+        :param road:
+        :return:
+        """
+        rect = self.get_rect(road)
+        increased_width = rect.width * 1.5
+        increased_height = rect.height
+        new_x = rect.x - (increased_width - rect.width) // 2  # Центрування хітбоксу
+
+        return pygame.Rect(
+            new_x, rect.y,
+            increased_width, increased_height
+        )
 
     def render(self, screen, road):
         """
