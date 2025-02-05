@@ -1,7 +1,7 @@
 import pygame
 import os
 
-from car import LamborghiniDiablo
+from car import Ferrari458Italia
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from input_manager import InputManager
 from parallax_manager import ParallaxManager
@@ -10,6 +10,7 @@ from road import Road
 from score_manager import ScoreManager
 from scoreboard import ScoreBoard  
 from menu import Menu
+from utils.sprite_manager import SpriteManager
 
 
 class Game:
@@ -26,13 +27,21 @@ class Game:
         self._initialize_game_components()
 
     def _initialize_game_components(self):
-        self.car = LamborghiniDiablo()
+        skySprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
+        hillsSprites = [
+            pygame.transform.scale(SpriteManager.load_image('hills_l.png'), (800, 400)),
+            pygame.transform.scale(SpriteManager.load_image('hills_r.png'), (800, 400)),
+        ]
+        treeSprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
+        grassSprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
+        
+        self.car = Ferrari458Italia()
         self.car.speed = 0
         self.road = Road()
         self.obstacle_manager = ObstacleManager()
         self.input_manager = InputManager()
         self.score_manager = ScoreManager()
-        self.parallax_manager = ParallaxManager()
+        self.parallax_manager = ParallaxManager(grassSprites, treeSprites, hillsSprites, skySprite)
         self.scoreboard = ScoreBoard()  
         
     def handle_events(self):
@@ -60,16 +69,16 @@ class Game:
         self.input_manager.update_car(self.car)
         self.car.update(self.road, delta_time)
 
-        if self.car.speed != 0:  
+        if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
             self.road.update(self.car.speed, delta_time)
-            self.parallax_manager.update(self.car.speed, self.road)
+            self.parallax_manager.update(self.screen, self.car.speed, self.road)
 
-            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
-                pygame.time.delay(100)  
-                self.show_game_over_screen()
+        if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
+            pygame.time.delay(100)  
+            self.show_game_over_screen()
             
             self.score_manager.update()
-                
+
     def render(self):
         if self.game_over:
             self.show_game_over_message()  # FIX: Відображаємо екран завершення гри

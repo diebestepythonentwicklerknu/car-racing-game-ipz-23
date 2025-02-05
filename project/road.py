@@ -9,8 +9,8 @@ class Road:
         self.segments = [{"curve": 0} for _ in range(5)]
         self.offset = 0
         self.turn_timer = 0  # Turn timer
-        self.road_color = (50, 50, 50)
-        self.lane_mark_color = (255, 255, 255)
+        self.road_color = (35, 20, 55)
+        self.lane_mark_color = (242, 102, 150)
         self.horizon_y = 400  # Позиція горизонту (нижче середини екрану)
         self.transition_progress = 0.0
         self.transition_duration = 5.0

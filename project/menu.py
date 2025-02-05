@@ -1,7 +1,9 @@
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BUTTON_WIDTH, BUTTON_HEIGHT, BUTTON_PADDING
 from scoreboard import ScoreBoard
+from utils.sprite_manager import SpriteManager
 import os
+
 
 
 class Menu:
@@ -10,27 +12,21 @@ class Menu:
         self.running = True
         self.nickname = None
         pygame.display.set_caption("Menu")
-
-        # Завантаження ретро-фону з файлу (в каталозі проєкту)
-        self.background = pygame.image.load(os.path.join(os.path.dirname(__file__), "assets", "1_retro_background.png"))
-        self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
-
-        # Завантаження ретро-шрифту аналогічно
-        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 40)
-        self.title_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 36)
+        self.background = SpriteManager.load_image("main_menu.png")
+        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
 
         # Fix : added Scoreboard button
         self.buttons = [   
-            {"text": "Play as Guest", "action": "guest", "rect": pygame.Rect(130, 250, 550, 50)},
-            {"text": "Play with Nickname", "action": "nickname", "rect": pygame.Rect(30, 320, 750, 60)},
-            {"text": "ScoreBoard", "action": "scoreboard", "rect": pygame.Rect(180, 390, 430, 50)},
-            {"text": "Quit", "action": "quit", "rect": pygame.Rect(250, 460, 300, 50)}
+            {"text": "Play as Guest", "action": "guest", "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 300, BUTTON_WIDTH, BUTTON_HEIGHT)},
+            {"text": "Login", "action": "nickname", "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 360, BUTTON_WIDTH, BUTTON_HEIGHT)},
+            {"text": "ScoreBoard", "action": "scoreboard", "rect": pygame.Rect((SCREEN_WIDTH - 250) // 2, 420, BUTTON_WIDTH, BUTTON_HEIGHT)},
+            {"text": "Quit", "action": "quit", "rect": pygame.Rect((SCREEN_WIDTH - BUTTON_WIDTH) // 2, 480, BUTTON_WIDTH, BUTTON_HEIGHT)}
         ]
 
-        # Миготіння тексту
-        self.title_color = (255, 255, 0)  # Жовтий
-        self.title_blink = True
-        self.blink_timer = 0
+        # # Миготіння тексту
+        # self.title_color = (255, 255, 0)  # Жовтий
+        # self.title_blink = True
+        # self.blink_timer = 0
 
     def render(self):
         """
@@ -39,11 +35,11 @@ class Menu:
         self.screen.blit(self.background, (0, 0))  # Малюємо фон
 
         # Відображаємо заголовок з миготінням
-        title_text = self.title_font.render("RETRO RACING", True, self.title_color)
-        self.screen.blit(
-            title_text,
-            (SCREEN_WIDTH // 2 - title_text.get_width() // 2 + 15, 100)
-        )
+        # title_text = self.title_font.render("RETRO RACING", True, self.title_color)
+        # self.screen.blit(
+        #     title_text,
+        #     (SCREEN_WIDTH // 2 - title_text.get_width() // 2 + 15, 100)
+        # )
 
         # Малюємо кнопки
         for button in self.buttons:
@@ -137,14 +133,14 @@ class Menu:
                     if back_button.collidepoint(event.pos):
                         return
 
-    def update(self):
-        """
-        Оновлює стан меню (міготіння тексту).
-        """
-        self.blink_timer += 1
-        if self.blink_timer % 100 == 0:  # Миготіння кожні 100 кадрів
-            self.title_blink = not self.title_blink
-            self.title_color = (255, 255, 0) if self.title_blink else (255, 0, 0)
+    # def update(self):
+    #     """
+    #     Оновлює стан меню (міготіння тексту).
+    #     """
+    #     self.blink_timer += 1
+    #     if self.blink_timer % 100 == 0:  # Миготіння кожні 100 кадрів
+    #         self.title_blink = not self.title_blink
+    #         self.title_color = (255, 255, 0) if self.title_blink else (255, 0, 0)
 
     def run(self):
         """
@@ -157,6 +153,6 @@ class Menu:
             for event in pygame.event.get():
                 self.handle_event(event)
             
-            self.update()
+            # self.update()
             self.render()
             pygame.display.flip()
