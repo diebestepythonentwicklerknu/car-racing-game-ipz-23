@@ -41,7 +41,7 @@ class Car:
         '''
         Defines the speed of steering based on car's speed
         '''
-        return max(1.5, 2 - abs(self.speed - 200) / 150)  # Max sensitivity at 80 km/h
+        return max(1.5, 2 - abs(self.speed - 200) / 150)  # Max sensitivity at 200 km/h
 
     def get_max_steering_angle(self) -> int:
         '''
@@ -162,7 +162,7 @@ class Car:
         Slowly decreases car's speed
         '''
         if self.speed > 0:
-            self.speed = max(self.speed - speed_factor, self.min_speed)  # Плавне гальмування
+            self.speed = max(self.speed - speed_factor, self.min_speed)  # Slow breaking
 
     def throttle_inertia(self):
         '''

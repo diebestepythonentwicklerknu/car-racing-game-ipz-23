@@ -38,9 +38,14 @@ class Menu:
         # Draw buttons
         for button in self.buttons:
 
-            pygame.draw.rect(self.screen, (35, 20, 55), button["rect"])  
-            pygame.draw.rect(self.screen, (242, 102, 150), button["rect"], 3)  # White border for buttons
-            text = self.font.render(button["text"], True, (242, 102, 150))
+            BACKGROUND_COLOR = (35, 20, 55)
+            BORDER_COLOR = (242, 102, 150)
+            TEXT_COLOR = (242, 102, 150)
+
+            pygame.draw.rect(self.screen, BACKGROUND_COLOR, button["rect"])
+            pygame.draw.rect(self.screen, BORDER_COLOR, button["rect"], 3)
+            text = self.font.render(button["text"], True, TEXT_COLOR)
+            
             text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Text centering
             text_y = button["rect"].y + (button["rect"].height - text.get_height()) // 2
             self.screen.blit(text, (text_x, text_y))
