@@ -1,4 +1,1 @@
-t 1309
-tt 1206
-AnderWHAT 301
-AnderWhat 6120
+Ander 125.05730924160686

@@ -79,7 +79,7 @@ class ParallaxManager:
             self.grass_sprite_index += constants.FRAME_STEP;
     
     def update_mountains(self, screen, road = None):
-        if road == None:
+        if road is None:
             self.left_offset = 0
             self.right_offset = 0
         else:
@@ -88,14 +88,14 @@ class ParallaxManager:
             max_right_offset = (road.calculate_control_points(road.next_turn)['right'][1][0] -
                             road.calculate_control_points('straight')['right'][1][0]) * -1;
             
-            if (self.left_offset > max_left_offset):
+            if self.left_offset > max_left_offset:
                 self.left_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
-            elif (self.left_offset < max_left_offset):
+            elif self.left_offset < max_left_offset:
                 self.left_offset += constants.MOUNTAIN_PARALLAX_FACTOR
 
-            if (self.right_offset < max_right_offset):
+            if self.right_offset < max_right_offset:
                 self.right_offset += constants.MOUNTAIN_PARALLAX_FACTOR
-            elif (self.right_offset > max_right_offset):
+            elif self.right_offset > max_right_offset:
                 self.right_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
         
         print(self.left_offset)

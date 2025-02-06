@@ -5,7 +5,7 @@ SpriteManager class is a utility class that helps to load and manage sprites
 '''
 class SpriteManager:
     def load_image(filename):
-        sprite = pygame.image.load('project/assets/sprites/' + filename).convert_alpha()
+        sprite = pygame.image.load('assets/sprites/' + filename).convert_alpha()
         sprite.set_colorkey((0,0,0))
         return sprite
     

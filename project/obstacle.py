@@ -64,8 +64,8 @@ class Obstacle:
         '''
         
         rect = self.get_rect(road)
-        scaledImage = pygame.transform.scale(self.sprite, (rect.width, rect.height))
-        screen.blit(scaledImage, rect);
+        scaled_image = pygame.transform.scale(self.sprite, (rect.width, rect.height))
+        screen.blit(scaled_image, rect);
 
         
         # Uncomment to test the hitbox

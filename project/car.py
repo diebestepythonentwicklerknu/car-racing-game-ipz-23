@@ -9,16 +9,16 @@ class Car:
     Player car class
     '''
     def __init__(self, sprites, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
-        self.isTurningLeft: bool = False;
-        self.isTurningRight: bool = False;
-        self.isStopping: bool = False;
+        self.isTurningLeft: bool = False
+        self.isTurningRight: bool = False
+        self.isStopping: bool = False
         
         self.x: int = constants.CAR_POSITION[0]
         self.y: int = constants.CAR_POSITION[1]
-        self.width: int = constants.CAR_SIZE[0];
-        self.height: int = constants.CAR_SIZE[1];
-        self.current_sprite_frame: int = 0;
-        self.sprites: List[pygame.Surface] = sprites;
+        self.width: int = constants.CAR_SIZE[0]
+        self.height: int = constants.CAR_SIZE[1]
+        self.current_sprite_frame: int = 0
+        self.sprites = sprites
         self.speed: int = 0 
         self.throttle: int = 0
         self.min_speed: int = 0
@@ -26,7 +26,7 @@ class Car:
         self.target_x: int = self.x  # Car's start position
         self.max_offset: int = 245
         self.road_center: int = constants.CAR_POSITION[0]
-        self.font: pygame.Font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
+        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
 
         # Car characteristics
         self.mass: int = mass  # Маса автомобіля в кг
@@ -110,13 +110,13 @@ class Car:
         Updates car sprites based on the current state
         '''
         
-        if (self.isTurningLeft):
+        if self.isTurningLeft:
             self._animate_turn_left()
-        elif (self.isTurningRight):
+        elif self.isTurningRight:
             self._animate_turn_right()
-        elif (self.isStopping):
+        elif self.isStopping:
             self._animate_stop()
-        elif (self.speed > 0):
+        elif self.speed > 0:
             self._animate_move()
         else:
             self.current_sprite_frame = 0
@@ -139,7 +139,7 @@ class Car:
             self.current_sprite_frame < 55):
             self.current_sprite_frame = 55
     def _animate_stop(self):
-        if (self.current_sprite_frame + 1 >= 20):
+        if self.current_sprite_frame + 1 >= 20:
             self.current_sprite_frame = 0
 
     def increase_throttle(self):
@@ -242,6 +242,6 @@ class Car:
 
 class Ferrari458Italia(Car):
     def __init__(self):
-        carSprites = SpriteManager.get_frame_sequence('car_full.png', 64, 24, 4);
-        super().__init__(carSprites, max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
+        car_sprites = SpriteManager.get_frame_sequence('car_full.png', 64, 24, 4);
+        super().__init__(car_sprites, max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
                         wheelbase=2.45)

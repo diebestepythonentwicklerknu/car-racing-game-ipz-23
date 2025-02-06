@@ -27,21 +27,21 @@ class Game:
         self._initialize_game_components()
 
     def _initialize_game_components(self):
-        skySprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
-        hillsSprites = [
+        sky_sprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
+        hills_sprites = [
             pygame.transform.scale(SpriteManager.load_image('hills_l.png'), (800, 400)),
             pygame.transform.scale(SpriteManager.load_image('hills_r.png'), (800, 400)),
         ]
-        treeSprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
-        grassSprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
+        tree_sprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
+        grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
         
         self.car = Ferrari458Italia()
-        self.car.speed: int = 0
+        #self.car.speed: int = 0
         self.road: Road = Road()
         self.obstacle_manager: ObstacleManager= ObstacleManager()
         self.input_manager: InputManager = InputManager()
         self.score_manager: ScoreManager = ScoreManager()
-        self.parallax_manager: ParallaxManager = ParallaxManager(grassSprites, treeSprites, hillsSprites, skySprite)
+        self.parallax_manager: ParallaxManager = ParallaxManager(grass_sprites, tree_sprites, hills_sprites, sky_sprite)
         self.scoreboard: ScoreBoard = ScoreBoard()  
         
     def handle_events(self):
