@@ -72,9 +72,9 @@ class Game:
 
         if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
             self.road.update(self.car.speed, delta_time)
-            self.parallax_manager.update(self.screen, self.car.speed, self.road)
+            self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera_offset_x)
 
-            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
+            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed, self.camera_offset_x):
                 pygame.time.delay(100)
                 self.show_game_over_screen()
 
@@ -86,8 +86,8 @@ class Game:
         elif not self.paused:
             self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
-            self.road.render(self.screen)
-            self.obstacle_manager.render(self.screen, self.road)
+            self.road.render(self.screen, self.camera_offset_x)
+            self.obstacle_manager.render(self.screen, self.road, self.camera_offset_x)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:

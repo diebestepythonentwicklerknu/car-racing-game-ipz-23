@@ -11,7 +11,7 @@ class Road:
         self.turn_timer = 0  # Turn timer
         self.road_color = (35, 20, 55)
         self.lane_mark_color = (242, 102, 150)
-        self.horizon_y = 400  # Позиція горизонту (нижче середини екрану)
+        self.horizon_y = 400  # Позиція горизонту (нижче середини екрана)
         self.transition_progress = 0.0
         self.transition_duration = 5.0
         self.turn_delay = 5.0
@@ -47,7 +47,7 @@ class Road:
             "straight": {"left": [(0, 600), (187, 500), (375, 400)], "right": [(800, 600), (613, 500), (425, 400)], }, }
         return control_points.get(turn_name, control_points["straight"])
 
-    def get_lane_positions(self, depth):
+    def get_lane_positions(self, depth, camera_offset_x):
         """
         Calculates lane boundaries for a given depth.
         """
@@ -56,13 +56,13 @@ class Road:
 
         # Interpolate control points between current and next turn
         interpolated_left = [
-            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress) for i
+            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress, camera_offset_x) for i
             in range(3)]
         interpolated_right = [
-            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress) for
+            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress, camera_offset_x) for
             i in range(3)]
 
-        # Calculate Bezier curve points for the given depth
+        # Calculate Bézier curve points for the given depth
         t = min(depth, 1)
         left_edge = self.bezier_point(t, *interpolated_left)
         right_edge = self.bezier_point(t, *interpolated_right)
@@ -79,11 +79,11 @@ class Road:
         return lane_edges, left_edge[1]
 
     @staticmethod
-    def interpolate_points(p1, p2, t):
+    def interpolate_points(p1, p2, t, camera_offset_x):
         """
         Interpolates two points `p1` and `p2` by parameter `t`.
         """
-        return (1 - t) * p1[0] + t * p2[0], (1 - t) * p1[1] + t * p2[1],
+        return ((1 - t) * p1[0] + t * p2[0]) + camera_offset_x, ((1 - t) * p1[1] + t * p2[1]),
 
     def update(self, speed, delta_time):
         self.offset += speed / 60
@@ -104,7 +104,7 @@ class Road:
             self.offset -= len(self.segments)
             self.segments.append(self.segments.pop(0))  # Rotate segments
 
-    def render(self, screen):
+    def render(self, screen, camera_offset_x):
         """
         Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
         """
@@ -118,9 +118,9 @@ class Road:
 
         # Інтерполяція між контрольними точками
         interpolated_left = [
-            self.interpolate_points(current_left[i], next_left[i], self.transition_progress) for i in range(3)]
+            self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera_offset_x) for i in range(3)]
         interpolated_right = [
-            self.interpolate_points(current_right[i], next_right[i], self.transition_progress) for i in range(3)]
+            self.interpolate_points(current_right[i], next_right[i], self.transition_progress, camera_offset_x) for i in range(3)]
 
         # Розрахунок точок для лівої та правої меж
         num_segments = 50  # Кількість точок на кривій для плавності

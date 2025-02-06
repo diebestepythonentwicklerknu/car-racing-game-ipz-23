@@ -18,23 +18,23 @@ class Obstacle:
         """
         self.depth -= self.speed_factor * (car_speed / 100)  # Чим ближче до гравця, тим менша глибина
 
-    def get_rect(self, road):
+    def get_rect(self, road, camera_offset_x):
         """
         Обчислює позицію і розмір перешкоди на основі перспективи.
         """
-        lane_edges, y = road.get_lane_positions(self.depth)
+        lane_edges, y = road.get_lane_positions(self.depth, camera_offset_x)
         width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8, 15)
         height = width // OBSTACLE_RATIO  # Пропорційна висота
         x = (lane_edges[self.lane] + lane_edges[self.lane + 1]) // 2
         return pygame.Rect(x - width // 2, y - height, width, height)
 
-    def get_reduced_rect(self, road):
+    def get_reduced_rect(self, road, camera_offset_x):
         """
         Обчислення хітбоксу, меншого за візуал
         :param road:
         :return:
         """
-        rect = self.get_rect(road)
+        rect = self.get_rect(road, camera_offset_x)
         reduced_width = int(rect.width * 0.8)
         reduced_height = int(rect.height * 0.8)
         return pygame.Rect(
@@ -43,14 +43,14 @@ class Obstacle:
             reduced_width, reduced_height
         )
 
-    def get_increased_rect(self, road):
+    def get_increased_rect(self, road, camera_offset_x):
         """
         Обчислення хітбоксу, більшого за візуал
         Використовується для близького обгону
         :param road:
         :return:
         """
-        rect = self.get_rect(road)
+        rect = self.get_rect(road, camera_offset_x)
         increased_width = rect.width * 1.5
         increased_height = rect.height
         new_x = rect.x - (increased_width - rect.width) // 2  # Центрування хітбоксу
@@ -60,12 +60,12 @@ class Obstacle:
             increased_width, increased_height
         )
 
-    def render(self, screen, road):
+    def render(self, screen, road, camera_offset_x):
         """
         Малює перешкоду на екрані.
         """
 
-        rect = self.get_rect(road)
+        rect = self.get_rect(road, camera_offset_x)
         scaled_image = pygame.transform.scale(self.sprite, (rect.width, rect.height))
         screen.blit(scaled_image, rect)
 

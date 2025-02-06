@@ -38,6 +38,7 @@ class InputManager:
             return True
         return False
 
+
     def update_car(self, car):
         """
         Оновлює стан автомобіля на основі натиснутих клавіш.

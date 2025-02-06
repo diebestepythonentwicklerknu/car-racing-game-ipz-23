@@ -21,7 +21,7 @@ class ParallaxManager:
         # Array of trees (background objects)
         self.trees = []
 
-    def update(self, screen, player_speed, road):
+    def update(self, screen, player_speed, road, camera_offset_x):
         """
         Update the background based on player speed and road state.
         """
@@ -29,19 +29,19 @@ class ParallaxManager:
             # Update existing trees
 
             for tree in self.trees:
-                tree.update(player_speed, road)
+                tree.update(player_speed, road, camera_offset_x)
 
             # Remove trees that are no longer visible
             self.trees = [tree for tree in self.trees if tree.is_visible()]
 
             if len(self.trees) < 3:
-                self.generate_trees(road)
+                self.generate_trees(road, camera_offset_x)
 
             self.update_grass(player_speed)
 
             self.update_mountains(screen, road)
 
-    def generate_trees(self, road):
+    def generate_trees(self, road, camera_offset_x):
         # Generate new trees randomly if fewer than 3 are visible
 
         side = random.choice(['left', 'right'])
@@ -52,7 +52,7 @@ class ParallaxManager:
 
         # Generate trees relative to the road's curvature
         depth = random.uniform(1.0, 1.2)
-        lane_edges, y_position = road.get_lane_positions(depth)
+        lane_edges, y_position = road.get_lane_positions(depth, camera_offset_x)
         offset = random.randint(10, 200)  # Fixed offset range
 
         if side == 'left':
