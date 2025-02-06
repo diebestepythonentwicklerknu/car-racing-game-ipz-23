@@ -2,7 +2,7 @@ import pygame
 import os
 
 from car import Ferrari458Italia
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+import constants
 from input_manager import InputManager
 from parallax_manager import ParallaxManager
 from obstacle_manager import ObstacleManager  
@@ -16,14 +16,14 @@ from utils.sprite_manager import SpriteManager
 class Game:
     def __init__(self, nickname=None):
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
         pygame.display.set_caption("Racing")
         self.clock = pygame.time.Clock()
-        self.running = True
-        self.paused = False  
-        self.game_over = False  # FIX: Додаємо флаг для екрану завершення гри
-        self.nickname = nickname  
-        self.camera_offset_x = 0  
+        self.running: bool = True
+        self.paused: bool = False  
+        self.game_over: bool = False  # FIX: Додаємо флаг для екрану завершення гри
+        self.nickname: str = nickname  
+        self.camera_offset_x: int = 0  
         self._initialize_game_components()
 
     def _initialize_game_components(self):
@@ -36,13 +36,13 @@ class Game:
         grassSprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
         
         self.car = Ferrari458Italia()
-        self.car.speed = 0
-        self.road = Road()
-        self.obstacle_manager = ObstacleManager()
-        self.input_manager = InputManager()
-        self.score_manager = ScoreManager()
-        self.parallax_manager = ParallaxManager(grassSprites, treeSprites, hillsSprites, skySprite)
-        self.scoreboard = ScoreBoard()  
+        self.car.speed: int = 0
+        self.road: Road = Road()
+        self.obstacle_manager: ObstacleManager= ObstacleManager()
+        self.input_manager: InputManager = InputManager()
+        self.score_manager: ScoreManager = ScoreManager()
+        self.parallax_manager: ParallaxManager = ParallaxManager(grassSprites, treeSprites, hillsSprites, skySprite)
+        self.scoreboard: ScoreBoard = ScoreBoard()  
         
     def handle_events(self):
         for event in pygame.event.get():
@@ -72,11 +72,11 @@ class Game:
         if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
             self.road.update(self.car.speed, delta_time)
             self.parallax_manager.update(self.screen, self.car.speed, self.road)
+            self.score_manager.update()
 
         if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
             pygame.time.delay(100)  
             self.show_game_over_screen()
-            
             self.score_manager.update()
 
     def render(self):
@@ -93,7 +93,7 @@ class Game:
             pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
                                                        "assets", "PressStart2P-Regular.ttf"), 40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
-            self.screen.blit(pause_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50))
+            self.screen.blit(pause_text, (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 - 50))
 
     def run(self):
         while self.running:
@@ -101,44 +101,47 @@ class Game:
             self.update()
             self.render()
             pygame.display.flip()
-            self.clock.tick(FPS)
+            self.clock.tick(constants.FPS)
 
         if self.nickname:  
             self.scoreboard.update_score(self.nickname, self.score_manager.score) 
         pygame.quit()
 
     def show_game_over_screen(self):
-        """ 
-        Встановлює флаг завершення гри і очікує натискання R або Q 
-        """
+        '''
+        Defines isGameOver flag and awaits R or Q to be pressed 
+        '''
         self.game_over = True
 
     def show_game_over_message(self):
-        """ 
-        Малює екран завершення гри 
-        """
+        '''
+        Renders game over screen
+        '''
         self.screen.fill((0, 0, 0))  
         font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
                                              "assets", "PressStart2P-Regular.ttf"), 30)
         text1 = font.render("Game Over!", True, (255, 0, 0))
         text2 = font.render("Press R to Restart", True, (255, 255, 255))
         text3 = font.render("Press Q for Menu", True, (255, 255, 255))
+        
+        center = (constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2)
+        
 
-        self.screen.blit(text1, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 100))
-        self.screen.blit(text2, (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2))
-        self.screen.blit(text3, (SCREEN_WIDTH // 2 - 230, SCREEN_HEIGHT // 2 + 50))
+        self.screen.blit(text1, (center[0] - 150, center[1] - 100))
+        self.screen.blit(text2, (center[0] - 250, center[1]))
+        self.screen.blit(text3, (center[0] - 230, center[1] + 50))
 
     def restart_game(self):
-        """ 
-        Скидає гру без виходу в головне меню
-        """
+        '''
+        Resets game without going back to the menu
+        '''
         self._initialize_game_components()
         self.game_over = False  
 
     def go_to_main_menu(self):
-        """
-        Повертає в меню після завершення гри
-        """
+        '''
+        Goes back to the menu after game is over
+        '''
         self.scoreboard.update_score(self.nickname, self.score_manager.score)  
 
         menu = Menu(self.screen)  
@@ -150,7 +153,3 @@ class Game:
         else:
             self.__init__("Guest")  
             self.run()
-
-        
-
-        

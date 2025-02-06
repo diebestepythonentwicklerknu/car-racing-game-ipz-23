@@ -27,9 +27,9 @@ class Tree:
         return int(self.min_height + (self.max_height - self.min_height) * (1 - self.depth))
 
     def update(self, car_speed, road):
-        """
+        '''
         Update tree position and depth based on player speed and road curvature.
-        """
+        '''
         speed_factor = 0.0125  # Factor to adjust depth based on speed
 
         self.depth -= speed_factor * (car_speed / 200)

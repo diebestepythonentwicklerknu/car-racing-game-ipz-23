@@ -59,15 +59,15 @@ class Obstacle:
         )
 
     def render(self, screen, road):
-        """
-        Малює перешкоду на екрані.
-        """
+        '''
+        Renders obstalces on the screen
+        '''
         
         rect = self.get_rect(road)
         scaledImage = pygame.transform.scale(self.sprite, (rect.width, rect.height))
         screen.blit(scaledImage, rect);
 
         
-        # Відмалювання хітбокса (Для тесту розкоментити)
+        # Uncomment to test the hitbox
         # reduced_rect = self.get_reduced_rect(road)
         # pygame.draw.rect(screen, (100, 199, 100), reduced_rect, 1)
