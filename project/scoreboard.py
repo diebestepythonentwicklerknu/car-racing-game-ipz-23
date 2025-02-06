@@ -32,7 +32,6 @@ class ScoreBoard:
             for nickname, score in self.scores.items():
                 file.write(f"{nickname} {score}\n")
 
-
     def update_score(self, nickname, score):
         """
         Оновлює найкращий результат гравця, якщо новий результат більший.
@@ -40,10 +39,10 @@ class ScoreBoard:
         """
         if nickname != "Guest":  # Гравці без нікнейму не зберігаються
             if nickname in self.scores:
-                if score > self.scores[nickname]:  
+                if score > self.scores[nickname]:
                     self.scores[nickname] = score
             else:
-                self.scores[nickname] = score  
+                self.scores[nickname] = score
 
             self.save_scores()
 

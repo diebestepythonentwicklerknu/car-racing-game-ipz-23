@@ -62,8 +62,8 @@ class Game:
             self.paused = not self.paused
 
     def update(self):
-        if self.game_over or self.paused:  
-            return  
+        if self.game_over or self.paused:
+            return
 
         delta_time = self.clock.get_time() / 1000
         self.input_manager.update_car(self.car)
@@ -72,12 +72,12 @@ class Game:
         if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
             self.road.update(self.car.speed, delta_time)
             self.parallax_manager.update(self.screen, self.car.speed, self.road)
-            self.score_manager.update()
 
-        if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
-            pygame.time.delay(100)  
-            self.show_game_over_screen()
-            self.score_manager.update()
+            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
+                pygame.time.delay(100)
+                self.show_game_over_screen()
+
+            self.score_manager.update(self.car.speed, self.car.max_speed)
 
     def render(self):
         if self.game_over:
