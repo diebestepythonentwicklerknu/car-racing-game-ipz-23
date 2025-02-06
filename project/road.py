@@ -1,7 +1,7 @@
 import random
 
 import pygame
-
+from utils.sprite_manager import SpriteManager
 
 class Road:
 
@@ -130,21 +130,20 @@ class Road:
         # Розрахунок точок для центральних ліній (розділових смуг)
         central_curve_left = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
                                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,) for i in
-                              range(len(left_curve))]
+                            range(len(left_curve))]
 
         central_curve_right = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
                                 left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,) for i in
-                               range(len(left_curve))]
+                            range(len(left_curve))]
 
-        # Draw road
         for i in range(num_segments):
-            pygame.draw.polygon(screen, self.road_color, [left_curve[i],  # Ліва нижня точка
-                                                          left_curve[i + 1],  # Ліва верхня точка
-                                                          right_curve[i + 1],  # Права верхня точка
-                                                          right_curve[i],  # Права нижня точка
-                                                          ], )
+            pygame.draw.polygon(screen, self.road_color, [left_curve[i],
+                                                    left_curve[i + 1], 
+                                                    right_curve[i + 1],
+                                                    right_curve[i],
+                                                ],)
 
-        # Draw dividing lines for lanes
+        #Draw dividing lines for lanes
         for i in range(num_segments):
             pygame.draw.line(screen, self.lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
             pygame.draw.line(screen, self.lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
