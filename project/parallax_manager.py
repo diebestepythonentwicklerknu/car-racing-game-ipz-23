@@ -1,8 +1,7 @@
 import random
 
-import pygame
-
-from constants import SCREEN_WIDTH, ROAD_HORIZON_Y, SCREEN_HEIGHT
+from constants import SCREEN_WIDTH
+from tree import Tree
 
 
 class ParallaxManager:
@@ -10,31 +9,40 @@ class ParallaxManager:
     Class to handle the background (hills and trees).
     """
 
-    def __init__(self):
-        self.background_color = (100, 100, 255)  # Sky blue
-        self.hill_color = (34, 139, 34)  # Green (hills)
-        self.tree_color = (139, 69, 19)  # Brown (trees)
+    def __init__(self, grass_sprites, tree_sprites, mountain_sprites, sky_sprites):
+        self.left_offset = 0
+        self.right_offset = 0
+        self.sky_sprites = sky_sprites
+        self.grass_sprites = grass_sprites
+        self.grass_sprite_index = 0
+        self.mountain_sprites = mountain_sprites
+        self.tree_sprites = tree_sprites
 
         # Array of trees (background objects)
         self.trees = []
 
-    def update(self, player_speed, road):
+    def update(self, screen, player_speed, road):
         """
         Update the background based on player speed and road state.
         """
         if player_speed > 0:
             # Update existing trees
+
             for tree in self.trees:
                 tree.update(player_speed, road)
 
             # Remove trees that are no longer visible
             self.trees = [tree for tree in self.trees if tree.is_visible()]
 
-            if len(self.trees) < 5:
+            if len(self.trees) < 3:
                 self.generate_trees(road)
 
+            self.update_grass(player_speed)
+
+            self.update_mountains(screen, road)
+
     def generate_trees(self, road):
-        # Generate new trees randomly if fewer than 5 are visible
+        # Generate new trees randomly if fewer than 3 are visible
 
         side = random.choice(['left', 'right'])
         if road.next_turn == "hard_left" and side == 'left':
@@ -45,7 +53,7 @@ class ParallaxManager:
         # Generate trees relative to the road's curvature
         depth = random.uniform(1.0, 1.2)
         lane_edges, y_position = road.get_lane_positions(depth)
-        offset = random.randint(10, 100)  # Fixed offset range
+        offset = random.randint(10, 200)  # Fixed offset range
 
         if side == 'left':
             if int(lane_edges[0]) - offset > 0:
@@ -57,68 +65,48 @@ class ParallaxManager:
         else:
             return
 
-        self.trees.append(Tree(position_x, side, depth, offset))
+        self.trees.append(Tree(self.tree_sprites, position_x, side, depth, offset))
+
+    def update_grass(self, player_speed):
+
+        if self.grass_sprite_index >= 15:
+            self.grass_sprite_index = 0
+        elif player_speed < 100:
+            self.grass_sprite_index += 0.5
+        else:
+            self.grass_sprite_index += 1
+
+    def update_mountains(self, screen, road=None):
+        if road is None:
+            self.left_offset = 0
+            self.right_offset = 0
+        else:
+
+            max_left_offset = (road.calculate_control_points(road.next_turn)['left'][1][0] -
+                               road.calculate_control_points('straight')['left'][1][0]) * -1
+            max_right_offset = (road.calculate_control_points(road.next_turn)['right'][1][0] -
+                                road.calculate_control_points('straight')['right'][1][0]) * -1
+
+            if self.left_offset > max_left_offset:
+                self.left_offset -= 1
+            elif self.left_offset < max_left_offset:
+                self.left_offset += 1
+
+            if self.right_offset < max_right_offset:
+                self.right_offset += 1
+            elif self.right_offset > max_right_offset:
+                self.right_offset -= 1
+
+        screen.blit(self.mountain_sprites[0], (self.left_offset, 10))
+        screen.blit(self.mountain_sprites[1], (self.right_offset, 10))
 
     def render(self, screen):
         """
         Малювання фону
         """
-        screen.fill(self.background_color)  # Небо
-        pygame.draw.rect(screen, self.hill_color, (0, 400, 800, 200))  # Гори
-        for tree in self.trees:
-            tree.render(screen, self.tree_color)
+        screen.blit(self.sky_sprites, (0, 0))
+        self.update_mountains(screen)
+        screen.blit(self.grass_sprites[int(self.grass_sprite_index // 5)], (0, 120))
 
-
-class Tree:
-
-    def __init__(self, x, side, depth, offset):
-        self.x = x
-        self.y = ROAD_HORIZON_Y
-        self.side = side
-        self.base_y = ROAD_HORIZON_Y  # Рівень горизонту
-        self.max_height = 300  # Максимальна висота дерева
-        self.max_width = 120  # Максимальна ширина дерева
-        self.min_height = 20  # Мінімальна висота дерева
-        self.min_width = 10  # Мінімальна ширина дерева
-        self.depth = depth  # Глибина дерева (чим ближче до 1, тим ближче до гравця)
-        self.offset = offset
-
-    @property
-    def width(self):
-        return int(self.min_width + (self.max_width - self.min_width) * (1 - self.depth))
-
-    @property
-    def height(self):
-        return int(self.min_height + (self.max_height - self.min_height) * (1 - self.depth))
-
-    def update(self, car_speed, road):
-        """
-        Update tree position and depth based on player speed and road curvature.
-        """
-        speed_factor = 0.012  # Speed scaling factor
-
-        # Update depth based on speed
-        self.depth -= speed_factor * (car_speed / 100)
-        if self.depth < 0.1:
-            self.depth = 0
-
-        # Adjust x position based on road curve and side
-        lane_edges, self.y = road.get_lane_positions(self.depth)
-        if self.side == 'left':
-            self.x = lane_edges[0] - self.offset  # Keep it to the left of the road
-            if road.next_turn == 'long_left' or 'hard_left':
-                self.x -= 50
-        elif self.side == 'right':
-            if road.next_turn == 'long_right' or 'hard_right':
-                self.x += 50
-            self.x = lane_edges[-1] + self.offset  # Keep it to the right of the road
-
-    def is_visible(self):
-        return self.depth > 0 and (0 <= self.x <= SCREEN_WIDTH and 0 <= self.y <= SCREEN_HEIGHT)
-
-    def render(self, screen, color):
-        pygame.draw.rect(screen, (139, 69, 19),
-                         (self.x + self.width // 3, self.y - self.height, self.width // 4, self.height))  # Trunk
-        pygame.draw.ellipse(screen, color,
-                            (self.x, self.y - self.height - self.width // 2, self.width, self.width))  # Crown
-
+        for tree in sorted(self.trees, key=lambda x: x.depth, reverse=True):
+            tree.render(screen)

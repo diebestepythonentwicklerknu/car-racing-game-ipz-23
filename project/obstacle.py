@@ -1,5 +1,8 @@
 import pygame
 
+from utils.sprite_constants import OBSTACLE_RATIO
+from utils.sprite_manager import SpriteManager
+
 
 class Obstacle:
     def __init__(self, lane, depth=1):
@@ -7,6 +10,7 @@ class Obstacle:
         self.depth = depth  # Початкова глибина (горизонт)
         self.color = (0, 255, 0)  # Зелений колір перешкоди
         self.speed_factor = 0.006
+        self.sprite = SpriteManager.load_image('obstacle.png')
 
     def update(self, car_speed):
         """
@@ -20,7 +24,7 @@ class Obstacle:
         """
         lane_edges, y = road.get_lane_positions(self.depth)
         width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8, 15)
-        height = width / 2  # Пропорційна висота
+        height = width // OBSTACLE_RATIO  # Пропорційна висота
         x = (lane_edges[self.lane] + lane_edges[self.lane + 1]) // 2
         return pygame.Rect(x - width // 2, y - height, width, height)
 
@@ -60,11 +64,11 @@ class Obstacle:
         """
         Малює перешкоду на екрані.
         """
+
         rect = self.get_rect(road)
-        pygame.draw.rect(screen, self.color, rect)
-        # Відмалювання хітбокса + хітбокса для обгону
-        # (Для тесту) Якщо перетинає малий хб - аварія, якщо великий - бонус 100 поінтів
-        reduced_rect = self.get_reduced_rect(road)
-        increased_rect = self.get_increased_rect(road)
-        pygame.draw.rect(screen, (255, 0, 0), reduced_rect, 2)
-        pygame.draw.rect(screen, (0, 0, 255), increased_rect, 2)
+        scaled_image = pygame.transform.scale(self.sprite, (rect.width, rect.height))
+        screen.blit(scaled_image, rect)
+
+        # Відмалювання хітбокса (Для тесту розкоментити)
+        # reduced_rect = self.get_reduced_rect(road)
+        # pygame.draw.rect(screen, (100, 199, 100), reduced_rect, 1)

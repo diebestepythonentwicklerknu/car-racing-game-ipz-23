@@ -68,7 +68,7 @@ class ObstacleManager:
         """
         Малює всі перешкоди.
         """
-        for obstacle in self.obstacles:
+        for obstacle in sorted(self.obstacles, key=lambda x: x.depth, reverse=True):
             obstacle.render(screen, road)
 
         # Малює повідомлення про бонусні очки
