@@ -6,12 +6,12 @@ ROAD_BOTTOM_WIDTH = 750
 ROAD_TOP_WIDTH = 50
 
 # Cars constasnts
-CAR_POSITION = (SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100) # 100px - is a buffer zone for a car
+CAR_POSITION = (SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)  # 100px - is a buffer zone for a car
 CAR_SIZE = (128, 48)
 CAR_STOP_FACTOR = 0.5
 CAR_INERTIA_FACTOR = 0.05
 
-#menu constants
+# menu constants
 
 BUTTON_WIDTH = 250
 BUTTON_HEIGHT = 50

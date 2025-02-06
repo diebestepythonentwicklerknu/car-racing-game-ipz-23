@@ -1,6 +1,8 @@
 import pygame
+
 from constants import SCREEN_WIDTH, ROAD_HORIZON_Y, SCREEN_HEIGHT
-from utils.sprite_constants import  MIN_TREE_HEIGHT, MIN_TREE_WIDTH
+from utils.sprite_constants import MIN_TREE_HEIGHT, MIN_TREE_WIDTH
+
 
 class Tree:
 
@@ -53,6 +55,6 @@ class Tree:
         return self.depth > 0 and (0 <= self.x <= SCREEN_WIDTH and 0 <= self.y <= SCREEN_HEIGHT)
 
     def render(self, screen):
-        scaledImage = pygame.transform.scale(self.current_sprite, (self.width, self.height))
-        scaledImage.set_colorkey((0, 0, 0))
-        screen.blit(scaledImage, (self.x, self.y - self.height));
+        scaled_image = pygame.transform.scale(self.current_sprite, (self.width, self.height))
+        scaled_image.set_colorkey((0, 0, 0))
+        screen.blit(scaled_image, (self.x, self.y - self.height))

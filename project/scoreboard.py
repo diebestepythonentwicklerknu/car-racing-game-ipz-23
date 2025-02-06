@@ -1,5 +1,6 @@
 import os
 
+
 class ScoreBoard:
     FILE_PATH = os.path.join(os.path.dirname(__file__), "players_scoreboard.txt")
 

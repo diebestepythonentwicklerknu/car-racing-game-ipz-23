@@ -1,15 +1,16 @@
-import pygame
 import os
+
+import pygame
 
 from car import Ferrari458Italia
 import constants
 from input_manager import InputManager
+from menu import Menu
+from obstacle_manager import ObstacleManager
 from parallax_manager import ParallaxManager
-from obstacle_manager import ObstacleManager  
 from road import Road
 from score_manager import ScoreManager
-from scoreboard import ScoreBoard  
-from menu import Menu
+from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
 
 
@@ -27,14 +28,14 @@ class Game:
         self._initialize_game_components()
 
     def _initialize_game_components(self):
-        skySprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
-        hillsSprites = [
+        sky_sprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
+        hills_sprites = [
             pygame.transform.scale(SpriteManager.load_image('hills_l.png'), (800, 400)),
             pygame.transform.scale(SpriteManager.load_image('hills_r.png'), (800, 400)),
         ]
-        treeSprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
-        grassSprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
-        
+        tree_sprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
+        grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
+
         self.car = Ferrari458Italia()
         self.car.speed: int = 0
         self.road: Road = Road()
@@ -43,18 +44,18 @@ class Game:
         self.score_manager: ScoreManager = ScoreManager()
         self.parallax_manager: ParallaxManager = ParallaxManager(grassSprites, treeSprites, hillsSprites, skySprite)
         self.scoreboard: ScoreBoard = ScoreBoard()  
-        
+          
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            
+
             elif self.game_over:  # Якщо гра закінчена, перевіряємо натискання R або Q
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
                         self.restart_game()  # R for restart Q for quit
                     elif event.key == pygame.K_q:
-                        self.go_to_main_menu()  
+                        self.go_to_main_menu()
             else:
                 self.input_manager.handle_event(event)
 
@@ -82,14 +83,14 @@ class Game:
     def render(self):
         if self.game_over:
             self.show_game_over_message()  # FIX: Відображаємо екран завершення гри
-        elif not self.paused:  
-            self.screen.fill((100, 200, 255))  
+        elif not self.paused:
+            self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
             self.road.render(self.screen)
             self.obstacle_manager.render(self.screen, self.road)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
-        else:  
+        else:
             pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
                                                        "assets", "PressStart2P-Regular.ttf"), 40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
@@ -103,8 +104,8 @@ class Game:
             pygame.display.flip()
             self.clock.tick(constants.FPS)
 
-        if self.nickname:  
-            self.scoreboard.update_score(self.nickname, self.score_manager.score) 
+        if self.nickname:
+            self.scoreboard.update_score(self.nickname, int(self.score_manager.score))
         pygame.quit()
 
     def show_game_over_screen(self):
@@ -136,19 +137,19 @@ class Game:
         Resets game without going back to the menu
         '''
         self._initialize_game_components()
-        self.game_over = False  
+        self.game_over = False
 
     def go_to_main_menu(self):
-        '''
+         '''
         Goes back to the menu after game is over
         '''
         self.scoreboard.update_score(self.nickname, self.score_manager.score)  
 
-        menu = Menu(self.screen)  
-        menu.run() 
+        menu = Menu(self.screen)
+        menu.run()
 
         if menu.nickname and menu.nickname != "Guest":
-            self.__init__(menu.nickname)  
+            self.__init__(menu.nickname)
             self.run()
         else:
             self.__init__("Guest")  

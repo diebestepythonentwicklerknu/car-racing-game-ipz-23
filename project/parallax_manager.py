@@ -1,10 +1,9 @@
 import random
 
-# from constants import SCREEN_WIDTH, ROAD_HORIZON_Y, SCREEN_HEIGHT
-
 import constants
 from utils.sprite_manager import SpriteManager
 from tree import Tree
+
 
 class ParallaxManager:
     """
@@ -27,19 +26,15 @@ class ParallaxManager:
         """
         if player_speed > 0:
             # Update existing trees
-            
+
             for tree in self.trees:
                 tree.update(player_speed, road)
-                
 
             # Remove trees that are no longer visible
             self.trees = [tree for tree in self.trees if tree.is_visible()]
 
             if len(self.trees) < 3:
                 self.generate_trees(road)
-            
-            
-            
             self.update_grass(player_speed);
             self.update_mountains(screen, road);
 
@@ -68,11 +63,11 @@ class ParallaxManager:
             return
 
         self.trees.append(Tree(self.tree_sprites, position_x, side, depth, offset))
-    
+
     def update_grass(self, player_speed):
-        
+
         if self.grass_sprite_index >= 15:
-            self.grass_sprite_index = 0;
+            self.grass_sprite_index = 0
         elif player_speed < 100:
             self.grass_sprite_index += constants.FRAME_STEP_SLOW;
         else:
@@ -97,10 +92,7 @@ class ParallaxManager:
                 self.right_offset += constants.MOUNTAIN_PARALLAX_FACTOR
             elif (self.right_offset > max_right_offset):
                 self.right_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
-        
-        print(self.left_offset)
-        print(self.right_offset)
-    
+
     def render(self, screen):
         """
         Малювання фону

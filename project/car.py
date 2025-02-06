@@ -1,8 +1,10 @@
 import math
+
 import pygame
 import os
 import constants
 from utils.sprite_manager import SpriteManager
+
 
 class Car:
     '''
@@ -83,7 +85,6 @@ class Car:
         elif self.steering_angle < 0:
             self.steering_angle = min(self.steering_angle + 0.1, 0)
 
-
     def update(self, road, delta_time: float):
         '''
         Updates car's state based on road conditions and user input.
@@ -103,7 +104,7 @@ class Car:
         screen.blit(self.sprites[int(self.current_sprite_frame // constants.FRAME_FACTOR)], (self.x - self.width, self.y, self.width, self.height));
         screen.blit(speed_text, (10, 580))
         #Uncomment to draw car hitbox
-        #pygame.draw.rect(screen, (0, 0, 0), (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1)
+        #pygame.draw.rect(screen, (0, 0, 0), (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1
 
     def update_car_sprite(self):
         '''
@@ -242,6 +243,7 @@ class Car:
 
 class Ferrari458Italia(Car):
     def __init__(self):
-        carSprites = SpriteManager.get_frame_sequence('car_full.png', 64, 24, 4);
-        super().__init__(carSprites, max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34, frontal_area=1.9,
-                        wheelbase=2.45)
+        car_sprites = SpriteManager.get_frame_sequence('car_full.png', 64, 24, 4)
+        super().__init__(car_sprites, max_speed=324, mass=1100, max_power=352000, drag_coefficient=0.34,
+                         frontal_area=1.9,
+                         wheelbase=2.45)
