@@ -5,10 +5,13 @@ import pygame
 
 class ScoreManager:
     """
-    Клас для управління очками та збереження найкращого результату.
+    Class for managing the score of the player.
     """
 
     def __init__(self, best_score_file="best_score.txt"):
+        '''
+        Initializes the score manager components
+        '''
         self.score = 0.0
         self.best_score = 0
         self.best_score_file = best_score_file
@@ -20,40 +23,44 @@ class ScoreManager:
 
     def _load_best_score(self):
         """
-        Завантажує найкращий результат з файлу.
+        Loads the best score from the file.
         """
         try:
             with open(self.best_score_file, "r") as file:
                 self.best_score = int(file.read().strip())
         except FileNotFoundError:
-            print("Файл з найкращим результатом не знайдено, створюється новий.")
+            print("File with best score not found. Setting value to 0.")
             self.best_score = 0
         except ValueError:
-            print("Файл найкращого результату пошкоджений. Встановлено значення 0.")
+            print("File with best score is corrupted. Setting value to 0.")
             self.best_score = 0
 
     def _save_best_score(self):
-        """Зберігає найкращий результат у файл."""
+        """
+        Saves the best score to a file.
+        """
         try:
             with open(self.best_score_file, "w") as file:
                 file.write(str(self.best_score))
         except IOError as e:
-            print(f"Помилка запису найкращого результату у файл: {e}")
+            print(f"Write to file error: {e}")
 
     def update(self, car_speed, car_max_speed):
         """
-        Оновлює поточний рахунок та перевіряє найкращий результат.
+        Updates the score based on the car speed and distance ridden.
         """
         score_increase = (car_speed / car_max_speed) * 0.5
         score_increase = max(0.01, score_increase)
 
-        self.score += score_increase  # Збільшення очок
+        self.score += score_increase  
         if self.score > self.best_score:
             self.best_score = int(self.score)
             self._save_best_score()
 
     def add_score(self, points):
-        """Додає задану параметром к-сть очок до поточного рахунку."""
+        """
+        Add fixed amount of points to the score.
+        """
         self.score += points
         if self.score > self.best_score:
             self.best_score = int(self.score)
@@ -61,9 +68,9 @@ class ScoreManager:
 
     def render(self, screen):
         """
-        Відображає поточний рахунок та найкращий результат.
+        Render the current score and the best score on the screen.
         """
         score_text = self.font.render(f"Score: {int(self.score)}", True, self.color)
         best_score_text = self.font.render(f"Best Score: {self.best_score}", True, self.color)
-        screen.blit(score_text, (10, 10))  # Поточний рахунок
-        screen.blit(best_score_text, (10, 50))  # Найкращий результат
+        screen.blit(score_text, (10, 10))  # Current score
+        screen.blit(best_score_text, (10, 50))  # Best score

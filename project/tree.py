@@ -5,6 +5,9 @@ from utils.sprite_constants import MIN_TREE_HEIGHT, MIN_TREE_WIDTH
 
 
 class Tree:
+    """
+    Class to represent a tree on the side of the road.
+    """
 
     def __init__(self, tree_sprites, x, side, depth, offset):
         self.x = x
@@ -12,12 +15,12 @@ class Tree:
         self.sprites = tree_sprites
         self.current_sprite = tree_sprites[0]
         self.side = side
-        self.base_y = ROAD_HORIZON_Y  # Рівень горизонту
-        self.max_height = tree_sprites[0].get_height() * 3  # Максимальна висота дерева
-        self.max_width = tree_sprites[0].get_width() * 3  # Максимальна ширина дерева
-        self.min_height = MIN_TREE_HEIGHT  # Мінімальна висота дерева
-        self.min_width = MIN_TREE_WIDTH  # Мінімальна ширина дерева
-        self.depth = depth  # Глибина дерева (чим ближче до 1, тим ближче до гравця)
+        self.base_y = ROAD_HORIZON_Y  
+        self.max_height = tree_sprites[0].get_height() * 3  
+        self.max_width = tree_sprites[0].get_width() * 3  
+        self.min_height = MIN_TREE_HEIGHT  
+        self.min_width = MIN_TREE_WIDTH  
+        self.depth = depth  # The closer to the player (1) the bigger the size
         self.offset = offset
 
     @property
@@ -29,9 +32,9 @@ class Tree:
         return int(self.min_height + (self.max_height - self.min_height) * (1 - self.depth))
 
     def update(self, car_speed, road):
-        """
+        '''
         Update tree position and depth based on player speed and road curvature.
-        """
+        '''
         speed_factor = 0.0125  # Factor to adjust depth based on speed
 
         self.depth -= speed_factor * (car_speed / 200)
@@ -52,9 +55,15 @@ class Tree:
             self.x = lane_edges[-1] + self.offset  # Keep it to the right of the road
 
     def is_visible(self):
+        '''
+        Returns True if the tree is visible on the screen.
+        '''
         return self.depth > 0 and (0 <= self.x <= SCREEN_WIDTH and 0 <= self.y <= SCREEN_HEIGHT)
 
     def render(self, screen):
+        '''
+        Render the tree on the screen.
+        '''
         scaled_image = pygame.transform.scale(self.current_sprite, (self.width, self.height))
         scaled_image.set_colorkey((0, 0, 0))
         screen.blit(scaled_image, (self.x, self.y - self.height))

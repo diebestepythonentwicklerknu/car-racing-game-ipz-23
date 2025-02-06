@@ -1,6 +1,7 @@
 import random
 
-from constants import SCREEN_WIDTH
+import constants
+from utils.sprite_manager import SpriteManager
 from tree import Tree
 
 
@@ -17,8 +18,6 @@ class ParallaxManager:
         self.grass_sprite_index = 0
         self.mountain_sprites = mountain_sprites
         self.tree_sprites = tree_sprites
-
-        # Array of trees (background objects)
         self.trees = []
 
     def update(self, screen, player_speed, road):
@@ -36,10 +35,11 @@ class ParallaxManager:
 
             if len(self.trees) < 3:
                 self.generate_trees(road)
-
-            self.update_grass(player_speed)
-
-            self.update_mountains(screen, road)
+            
+            
+            
+            self.update_grass(player_speed);
+            self.update_mountains(screen, road);
 
     def generate_trees(self, road):
         # Generate new trees randomly if fewer than 3 are visible
@@ -60,8 +60,8 @@ class ParallaxManager:
                 position_x = random.randint(0, int(lane_edges[0]) - offset)
             else:
                 return
-        elif int(lane_edges[-1]) + offset < SCREEN_WIDTH - 1:
-            position_x = random.randint(int(lane_edges[-1]) + offset, SCREEN_WIDTH)
+        elif int(lane_edges[-1]) + offset < constants.SCREEN_WIDTH - 1:
+            position_x = random.randint(int(lane_edges[-1]) + offset, constants.SCREEN_WIDTH)
         else:
             return
 
@@ -72,41 +72,41 @@ class ParallaxManager:
         if self.grass_sprite_index >= 15:
             self.grass_sprite_index = 0
         elif player_speed < 100:
-            self.grass_sprite_index += 0.5
+            self.grass_sprite_index += constants.FRAME_STEP_SLOW;
         else:
-            self.grass_sprite_index += 1
-
-    def update_mountains(self, screen, road=None):
+            self.grass_sprite_index += constants.FRAME_STEP;
+    
+    def update_mountains(self, screen, road = None):
         if road is None:
             self.left_offset = 0
             self.right_offset = 0
         else:
-
-            max_left_offset = (road.calculate_control_points(road.next_turn)['left'][1][0] -
-                               road.calculate_control_points('straight')['left'][1][0]) * -1
+            max_left_offset = (road.calculate_control_points(road.next_turn)['left'][1][0] - 
+                            road.calculate_control_points('straight')['left'][1][0]) * -1;
             max_right_offset = (road.calculate_control_points(road.next_turn)['right'][1][0] -
-                                road.calculate_control_points('straight')['right'][1][0]) * -1
-
+                            road.calculate_control_points('straight')['right'][1][0]) * -1;
+            
             if self.left_offset > max_left_offset:
-                self.left_offset -= 1
+                self.left_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
             elif self.left_offset < max_left_offset:
-                self.left_offset += 1
+                self.left_offset += constants.MOUNTAIN_PARALLAX_FACTOR
 
             if self.right_offset < max_right_offset:
-                self.right_offset += 1
+                self.right_offset += constants.MOUNTAIN_PARALLAX_FACTOR
             elif self.right_offset > max_right_offset:
-                self.right_offset -= 1
-
-        screen.blit(self.mountain_sprites[0], (self.left_offset, 10))
-        screen.blit(self.mountain_sprites[1], (self.right_offset, 10))
-
+                self.right_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
+        
+        print(self.left_offset)
+        print(self.right_offset)
+    
     def render(self, screen):
         """
-        Малювання фону
+        Render the background elements.
         """
-        screen.blit(self.sky_sprites, (0, 0))
-        self.update_mountains(screen)
-        screen.blit(self.grass_sprites[int(self.grass_sprite_index // 5)], (0, 120))
+        screen.blit(self.sky_sprites, (0, 0)) 
+        screen.blit(self.grass_sprites[int(self.grass_sprite_index // constants.FRAME_FACTOR)], (0, 120))
+        screen.blit(self.mountain_sprites[0], (self.left_offset, 0))
+        screen.blit(self.mountain_sprites[1], (self.right_offset, 0))
 
         for tree in sorted(self.trees, key=lambda x: x.depth, reverse=True):
             tree.render(screen)

@@ -7,6 +7,9 @@ class InputManager:
     '''
 
     def __init__(self):
+        '''
+        Initializes the input manager components
+        '''
         self.actions = {pygame.K_LEFT: 'left',
                         pygame.K_RIGHT: 'right',
                         pygame.K_UP: 'accelerate',
@@ -14,7 +17,7 @@ class InputManager:
         self.pressed_keys = set()
         self.unpressed_keys = set()
         self.pause_key_pressed: bool = False
-        self.pause_key_handled: bool = False  # Для обробки натискання Space один раз
+        self.pause_key_handled: bool = False  # Space key
 
     def handle_event(self, event):
         '''
@@ -29,14 +32,14 @@ class InputManager:
             self.unpressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
                 self.pause_key_pressed = False
-                self.pause_key_handled = False  # Дозволяємо повторну обробку Space
+                self.pause_key_handled = False  
 
     def is_pause_pressed(self):
         '''
         Checks if the Pause button is pressed. Returns TRUE only once 
         '''
         if self.pause_key_pressed and not self.pause_key_handled:
-            self.pause_key_handled = True  #Space вже оброблено
+            self.pause_key_handled = True  #Space is pressed
             return True
         return False
 
