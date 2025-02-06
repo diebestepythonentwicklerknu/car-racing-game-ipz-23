@@ -63,10 +63,7 @@ class ObstacleManager:
         '''
         Checks if objects collides with the player
         '''
-        for obstacle in self.obstacles:
-            if obstacle.get_rect(road).colliderect(player.get_rect()):
-                return True
-        return False
+        return any(obstacle.get_rect(road).colliderect(player.get_rect()) for obstacle in self.obstacles) # FIX: a bit siplified visualy, but it works
 
     def render(self, screen, road):
         '''

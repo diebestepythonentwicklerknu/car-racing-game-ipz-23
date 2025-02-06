@@ -32,7 +32,17 @@ class InputManager:
             self.unpressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
                 self.pause_key_pressed = False
-                self.pause_key_handled = False  
+                self.pause_key_handled = False 
+
+    def handle_pause(func):
+        '''
+        Decorator to pause the game
+        '''
+        def wrapper(self, *args, **kwargs):
+            if self.is_pause_pressed():
+                return
+            return func(self, *args, **kwargs)
+        return wrapper 
 
     def is_pause_pressed(self):
         '''
@@ -43,28 +53,21 @@ class InputManager:
             return True
         return False
 
+    @handle_pause
     def update_car(self, car):
-        '''
-        Updates car state based on pressed keys
-        '''
-        if pygame.K_LEFT in self.pressed_keys:
+        """ Оновлює стан автомобіля на основі введених даних """
+        car.isTurningLeft = pygame.K_LEFT in self.pressed_keys
+        car.isTurningRight = pygame.K_RIGHT in self.pressed_keys
+        car.isStopping = pygame.K_DOWN in self.pressed_keys
+
+        if car.isTurningLeft:
             car.move_left()
-            car.isTurningLeft = True
-        else:
-            car.isTurningLeft = False
-
-        if pygame.K_RIGHT in self.pressed_keys:
+        if car.isTurningRight:
             car.move_right()
-            car.isTurningRight = True
-        else:
-            car.isTurningRight = False
-
         if pygame.K_UP in self.pressed_keys:
             car.increase_throttle()
-        elif pygame.K_DOWN in self.pressed_keys:
+        elif car.isStopping:
             car.decrease_throttle()
-            car.isStopping = True;
         else:
             car.decrease_speed(constants.CAR_INERTIA_FACTOR)
             car.throttle_inertia()
-            car.isStopping = False;
