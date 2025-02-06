@@ -2,7 +2,8 @@ import os
 
 
 class ScoreBoard:
-    FILE_PATH = os.path.join(os.path.dirname(__file__), "players_scoreboard.txt")
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    FILE_PATH = os.path.join(BASE_DIR, "players_scoreboard.txt")
 
     def __init__(self):
         self.scores = self.load_scores()
