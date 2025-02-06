@@ -1,11 +1,19 @@
+import os
+
 import pygame
 import constants
 from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
 import os
 
+'''
+Menu class renders and handles the main menu
+'''
 class Menu:
     def __init__(self, screen):
+        '''
+        Initialization of the menu components
+        '''
         self.screen = screen
         self.running: bool = True
         self.nickname: str = None
@@ -27,13 +35,13 @@ class Menu:
         '''
         self.screen.blit(self.background, (0, 0))
 
-        # Малюємо кнопки
+        # Draw buttons
         for button in self.buttons:
 
             pygame.draw.rect(self.screen, (35, 20, 55), button["rect"])  
-            pygame.draw.rect(self.screen, (242, 102, 150), button["rect"], 3)  # Білий контур навколо кнопки
+            pygame.draw.rect(self.screen, (242, 102, 150), button["rect"], 3)  # White border for buttons
             text = self.font.render(button["text"], True, (242, 102, 150))
-            text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Текст по центру кнопки
+            text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Text centering
             text_y = button["rect"].y + (button["rect"].height - text.get_height()) // 2
             self.screen.blit(text, (text_x, text_y))
 
@@ -44,7 +52,7 @@ class Menu:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:             
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for button in self.buttons:
                 if button["rect"].collidepoint(event.pos):
                     if button["action"] == "guest":
@@ -63,7 +71,7 @@ class Menu:
         '''
         nickname = ""
         font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 24)
-    
+
         while True:
             self.screen.fill((0, 0, 0))
             prompt = font.render("Enter your nickname:", True, (255, 255, 255))
@@ -81,7 +89,7 @@ class Menu:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN and nickname.strip():
                         self.running = False
-                        self.nickname = nickname.strip()  # Зберігаємо нікнейм для гри
+                        self.nickname = nickname.strip()  # Saving nickname
                         return
                     elif event.key == pygame.K_BACKSPACE:
                         nickname = nickname[:-1]
@@ -112,7 +120,7 @@ class Menu:
             pygame.draw.rect(self.screen, (255, 0, 0), back_button)
             back_text = font.render("Back", True, (255, 255, 255))
             self.screen.blit(back_text, (back_button.x + 100, back_button.y + 10))
-        
+
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -129,11 +137,10 @@ class Menu:
         '''
         if self.nickname is None:
             self.nickname = "Guest"
-            
+
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)
-            
-            # self.update()
+
             self.render()
             pygame.display.flip()

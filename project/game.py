@@ -1,19 +1,25 @@
-import pygame
 import os
+import pygame
 
 from car import Ferrari458Italia
 import constants
 from input_manager import InputManager
+from menu import Menu
+from obstacle_manager import ObstacleManager
 from parallax_manager import ParallaxManager
-from obstacle_manager import ObstacleManager  
 from road import Road
 from score_manager import ScoreManager
-from scoreboard import ScoreBoard  
-from menu import Menu
+from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
 
-
+'''
+Main game-scenario class
+'''
 class Game:
+
+    '''
+    Initialization of the game
+    '''
     def __init__(self, nickname=None):
         pygame.init()
         self.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
@@ -21,11 +27,14 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running: bool = True
         self.paused: bool = False  
-        self.game_over: bool = False  # FIX: Додаємо флаг для екрану завершення гри
+        self.game_over: bool = False  
         self.nickname: str = nickname  
         self.camera_offset_x: int = 0  
         self._initialize_game_components()
 
+    '''
+    Initialization of the game components
+    '''
     def _initialize_game_components(self):
         sky_sprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
         hills_sprites = [
@@ -36,31 +45,38 @@ class Game:
         grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
         
         self.car = Ferrari458Italia()
-        #self.car.speed: int = 0
         self.road: Road = Road()
         self.obstacle_manager: ObstacleManager= ObstacleManager()
         self.input_manager: InputManager = InputManager()
         self.score_manager: ScoreManager = ScoreManager()
         self.parallax_manager: ParallaxManager = ParallaxManager(grass_sprites, tree_sprites, hills_sprites, sky_sprite)
         self.scoreboard: ScoreBoard = ScoreBoard()  
-        
+
+
+    '''
+    Handling of the game events
+    Processing pressed keys
+    '''    
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-            
-            elif self.game_over:  # Якщо гра закінчена, перевіряємо натискання R або Q
+
+            elif self.game_over:  # If game is over, wait for R(restart) or Q(quit) to be pressed
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        self.restart_game()  # R for restart Q for quit
+                        self.restart_game() 
                     elif event.key == pygame.K_q:
-                        self.go_to_main_menu()  
+                        self.go_to_main_menu()
             else:
                 self.input_manager.handle_event(event)
 
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
 
+    '''
+    Updating the paralax, obstacles, road and car states
+    '''
     def update(self):
         if self.game_over or self.paused:
             return
@@ -79,22 +95,29 @@ class Game:
 
             self.score_manager.update(self.car.speed, self.car.max_speed)
 
+    '''
+    Rendering all the game components
+    '''
     def render(self):
         if self.game_over:
-            self.show_game_over_message()  # FIX: Відображаємо екран завершення гри
-        elif not self.paused:  
-            self.screen.fill((100, 200, 255))  
+            self.show_game_over_message()  # Show game over screen
+        elif not self.paused:
+            self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
             self.road.render(self.screen)
             self.obstacle_manager.render(self.screen, self.road)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
-        else:  
+        else:
             pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
                                                        "assets", "PressStart2P-Regular.ttf"), 40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
             self.screen.blit(pause_text, (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 - 50))
 
+    '''
+    Running the game
+    Main game loop
+    '''
     def run(self):
         while self.running:
             self.handle_events()
@@ -103,20 +126,21 @@ class Game:
             pygame.display.flip()
             self.clock.tick(constants.FPS)
 
-        if self.nickname:  
-            self.scoreboard.update_score(self.nickname, self.score_manager.score) 
+        if self.nickname:
+            self.scoreboard.update_score(self.nickname, int(self.score_manager.score))
         pygame.quit()
 
+    '''
+    Defines isGameOver flag and awaits R or Q to be pressed 
+    '''
     def show_game_over_screen(self):
-        '''
-        Defines isGameOver flag and awaits R or Q to be pressed 
-        '''
         self.game_over = True
 
+
+    '''
+    Renders game over screen
+    '''
     def show_game_over_message(self):
-        '''
-        Renders game over screen
-        '''
         self.screen.fill((0, 0, 0))  
         font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
                                              "assets", "PressStart2P-Regular.ttf"), 30)
@@ -131,25 +155,25 @@ class Game:
         self.screen.blit(text2, (center[0] - 250, center[1]))
         self.screen.blit(text3, (center[0] - 230, center[1] + 50))
 
+    '''
+    Resets game without going back to the menu
+    '''
     def restart_game(self):
-        '''
-        Resets game without going back to the menu
-        '''
         self._initialize_game_components()
-        self.game_over = False  
+        self.game_over = False
 
+    '''
+    Goes back to the menu after game is over
+    '''
     def go_to_main_menu(self):
-        '''
-        Goes back to the menu after game is over
-        '''
         self.scoreboard.update_score(self.nickname, self.score_manager.score)  
 
-        menu = Menu(self.screen)  
-        menu.run() 
+        menu = Menu(self.screen)
+        menu.run()
 
         if menu.nickname and menu.nickname != "Guest":
-            self.__init__(menu.nickname)  
+            self.__init__(menu.nickname)
             self.run()
         else:
-            self.__init__("Guest")  
+            self.__init__("Guest")
             self.run()

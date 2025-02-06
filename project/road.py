@@ -11,7 +11,7 @@ class Road:
         self.turn_timer = 0  # Turn timer
         self.road_color = (35, 20, 55)
         self.lane_mark_color = (242, 102, 150)
-        self.horizon_y = 400  # Позиція горизонту (нижче середини екрану)
+        self.horizon_y = 400  # Horizon line a bit below the center
         self.transition_progress = 0.0
         self.transition_duration = 5.0
         self.turn_delay = 5.0
@@ -41,8 +41,8 @@ class Road:
         """
         control_points = {
             "hard_left": {"left": [(0, 600), (300, 500), (0, 400)], "right": [(800, 600), (600, 400), (150, 400)], },
-            "long_left": {"left": [(0, 600), (300, 500), (220, 400)], "right": [(800, 600), (500, 400), (350, 400)], },
-            "long_right": {"left": [(0, 600), (300, 400), (450, 400)], "right": [(800, 600), (500, 500), (580, 400)], },
+            "long_left": {"left": [(0, 600), (300, 500), (220, 400)], "right": [(800, 600), (500, 400), (300, 400)], },
+            "long_right": {"left": [(0, 600), (300, 400), (500, 400)], "right": [(800, 600), (500, 500), (580, 400)], },
             "hard_right": {"left": [(0, 600), (200, 400), (650, 400)], "right": [(800, 600), (500, 500), (800, 400)], },
             "straight": {"left": [(0, 600), (187, 500), (375, 400)], "right": [(800, 600), (613, 500), (425, 400)], }, }
         return control_points.get(turn_name, control_points["straight"])
@@ -106,7 +106,7 @@ class Road:
 
     def render(self, screen):
         """
-        Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
+        Draws the road with curved edges using Bezier curves and adds solid lines.
         """
         # Extract control points for the current and next turns
         current_controls = self.calculate_control_points(self.current_turn)
@@ -116,18 +116,18 @@ class Road:
         current_left, current_right = current_controls["left"], current_controls["right"]
         next_left, next_right = next_controls["left"], next_controls["right"]
 
-        # Інтерполяція між контрольними точками
+        # Interpolate control points between current and next turn
         interpolated_left = [
             self.interpolate_points(current_left[i], next_left[i], self.transition_progress) for i in range(3)]
         interpolated_right = [
             self.interpolate_points(current_right[i], next_right[i], self.transition_progress) for i in range(3)]
 
-        # Розрахунок точок для лівої та правої меж
-        num_segments = 50  # Кількість точок на кривій для плавності
+        # Calculate Bezier curve points for the left and right edges
+        num_segments = 50  # Number of segments to draw the road
         left_curve = [self.bezier_point(t / num_segments, *interpolated_left) for t in range(num_segments + 1)]
         right_curve = [self.bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
 
-        # Розрахунок точок для центральних ліній (розділових смуг)
+        # Calculate central curve points for lane dividing lines
         central_curve_left = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
                                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,) for i in
                             range(len(left_curve))]

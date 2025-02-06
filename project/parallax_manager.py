@@ -1,10 +1,9 @@
 import random
 
-# from constants import SCREEN_WIDTH, ROAD_HORIZON_Y, SCREEN_HEIGHT
-
 import constants
 from utils.sprite_manager import SpriteManager
 from tree import Tree
+
 
 class ParallaxManager:
     """
@@ -27,10 +26,9 @@ class ParallaxManager:
         """
         if player_speed > 0:
             # Update existing trees
-            
+
             for tree in self.trees:
                 tree.update(player_speed, road)
-                
 
             # Remove trees that are no longer visible
             self.trees = [tree for tree in self.trees if tree.is_visible()]
@@ -68,11 +66,11 @@ class ParallaxManager:
             return
 
         self.trees.append(Tree(self.tree_sprites, position_x, side, depth, offset))
-    
+
     def update_grass(self, player_speed):
-        
+
         if self.grass_sprite_index >= 15:
-            self.grass_sprite_index = 0;
+            self.grass_sprite_index = 0
         elif player_speed < 100:
             self.grass_sprite_index += constants.FRAME_STEP_SLOW;
         else:
@@ -103,7 +101,7 @@ class ParallaxManager:
     
     def render(self, screen):
         """
-        Малювання фону
+        Render the background elements.
         """
         screen.blit(self.sky_sprites, (0, 0)) 
         screen.blit(self.grass_sprites[int(self.grass_sprite_index // constants.FRAME_FACTOR)], (0, 120))

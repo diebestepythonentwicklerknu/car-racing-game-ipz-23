@@ -29,25 +29,25 @@ class Car:
         self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
 
         # Car characteristics
-        self.mass: int = mass  # Маса автомобіля в кг
-        self.max_power: int = max_power  # Максимальна потужність в Вт
+        self.mass: int = mass  # In kg
+        self.max_power: int = max_power  # In watts
         self.drag_coefficient: float = drag_coefficient
-        self.frontal_area: int = frontal_area  # Лобова площа в м²
-        self.air_density: float = 1.225  # Густина повітря в кг/м³
-        self.wheelbase: int = wheelbase  # Колісна база автомобіля в метрах
-        self.steering_angle: int = 0  # Кут повороту керма
+        self.frontal_area: int = frontal_area  # In m²
+        self.air_density: float = 1.225  # In kg/m³
+        self.wheelbase: int = wheelbase  # In meters
+        self.steering_angle: int = 0  # In degrees
 
     def get_steering_factor(self) -> float:
         '''
         Defines the speed of steering based on car's speed
         '''
-        return max(1.5, 2 - abs(self.speed - 200) / 150)  # Максимальна чутливість при 80 км/год
+        return max(1.5, 2 - abs(self.speed - 200) / 150)  # Max sensitivity at 80 km/h
 
     def get_max_steering_angle(self) -> int:
         '''
         Limits the steering max angle based on the current speed
         '''
-        return max(10, 20 - (self.speed / 60))  # При 300 км/год макс кут = 10°
+        return max(10, 20 - (self.speed / 60))  # Max angle at 300 km/h = 10°
 
     def with_steering_params(func):
         def wrapper(self, *args, **kwargs):
@@ -102,6 +102,7 @@ class Car:
         self.update_car_sprite()
         screen.blit(self.sprites[int(self.current_sprite_frame // constants.FRAME_FACTOR)], (self.x - self.width, self.y, self.width, self.height));
         screen.blit(speed_text, (10, 580))
+
         #Uncomment to draw car hitbox
         #pygame.draw.rect(screen, (0, 0, 0), (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1)
 
@@ -180,24 +181,24 @@ class Car:
         '''
         Road impact on a car movement
         '''
-        # Визначення сили впливу для кожного типу повороту
-        turn_effect = {"straight": 0,  # Без зміщення
-                       "long_left": 0.4,  # Легкий вплив вправо
-                       "long_right": -0.4,  # Легкий вплив вліво
-                       "hard_left": 0.8,  # Сильний вплив вправо
-                       "hard_right": -0.8  # Сильний вплив вліво
+        # Defines the road-force impact on the car's movement
+        turn_effect = {"straight": 0,  # Without any impact
+                       "long_left": 0.4,  # Slight impact to the right
+                       "long_right": -0.4,  # Slight impact to the left
+                       "hard_left": 0.8,  # Strong impact to the right
+                       "hard_right": -0.8  # Strong impact to the left
                        }
 
-        # Отримання сили впливу повороту
+        # Get the road's impact on the car's turns
         force_multiplier = turn_effect.get(road.next_turn, 0)
 
-        # Розрахунок зміщення залежно від швидкості та часу
+        # Calculate the force based on speed and time
         force = force_multiplier * self.speed * delta_time
 
-        # Зміщення автомобіля
+        # Apply the force to the car's position
         self.x += force
 
-        # Обмеження в межах дороги
+        # Limit the car's position to the road's width
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
 
     def _update_speed(self):
@@ -205,26 +206,26 @@ class Car:
         Updates car's speed based on throttle level & physics
         '''
         if self.speed > 0 or self.throttle > 0:
-            # Обчислення сили аеродинамічного опору
+            # Drag force calculation based on diffrerent factors
             drag_force = 0.5 * self.drag_coefficient * self.air_density * self.frontal_area * (self.speed / 3.6) ** 2
 
-            # Обмеження максимальної тяги двигуна
+            # Limit the drag force to the car's power
             max_force = ((self.max_power * self.throttle) /
                          max(self.speed / 3.6, 1e-6)) if self.speed > 0 else self.max_power * self.throttle
 
-            # Чиста сила для прискорення
+            # Net force calculation
             net_force = max(0, max_force - drag_force)
 
-            # Обчислення прискорення
+            # Acceleration calculation
             acceleration = net_force / self.mass
 
-            # Оновлення швидкості автомобіля
+            # Speed update
             self.speed += acceleration * (1 / 60) * 3.6
 
-            # Обмеження швидкості максимальним значенням
+            # Speed limits
             self.speed = max(self.min_speed, min(self.speed, self.max_speed))
 
-        # Повільне зменшення швидкості, якщо газ не натиснутий
+        # Slight decrease in speed if no throttle is applied
         if self.throttle == 0 and self.speed > 0:
             self.decrease_speed(constants.CAR_INERTIA_FACTOR)
 
@@ -234,7 +235,7 @@ class Car:
         '''
         if abs(self.steering_angle) > 0:
             radius = self.wheelbase / math.tan(math.radians(self.steering_angle))
-            angular_velocity = (self.speed / 3.6) / radius  # Радіани в секунду
+            angular_velocity = (self.speed / 3.6) / radius  # Radians per second
             self.x += angular_velocity * radius * math.sin(math.radians(self.steering_angle))
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
