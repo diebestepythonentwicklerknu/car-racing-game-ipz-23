@@ -6,6 +6,8 @@ from utils.sprite_manager import SpriteManager
 '''
 Class to handle the obstacles on the road
 '''
+
+
 class Obstacle:
     def __init__(self, lane, depth=1):
         """
@@ -13,7 +15,7 @@ class Obstacle:
         """
         self.lane = lane
         self.depth = depth  # Horizon
-        self.color = (0, 255, 0)  
+        self.color = (0, 255, 0)
         self.speed_factor = 0.006
         self.sprite = SpriteManager.load_image('obstacle.png')
 
@@ -23,7 +25,7 @@ class Obstacle:
         """
         self.depth -= self.speed_factor * (car_speed / 100)  # The closer to the player the bigger the size
 
-    def compute_rect(self, road, scale_factor=1.0): 
+    def compute_rect(self, road, scale_factor=1.0):
         lane_edges, y = road.get_lane_positions(self.depth)
         width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8 * scale_factor, 15)
         height = width // OBSTACLE_RATIO
@@ -38,22 +40,19 @@ class Obstacle:
         return self.compute_rect(road, scale_factor=0.8)
 
     def get_increased_rect(self, road):
-        return self.compute_rect(road, scale_factor=1.4) # Fix: made a  size of the bigger hitbox a lil bit smaller
+        return self.compute_rect(road, scale_factor=1.4)  # Fix: made a  size of the bigger hitbox a lil bit smaller
 
     def render(self, screen, road):
         """
         Renders obstalces on the screen
         """
-        
+
         rect = self.get_rect(road)
         scaled_image = pygame.transform.scale(self.sprite, (rect.width, rect.height))
         screen.blit(scaled_image, rect)
 
-        
-        #Uncomment to test the hitbox
-        #reduced_rect = self.get_reduced_rect(road)
-        #increased_rect = self.get_increased_rect(road)
-        #pygame.draw.rect(screen, (100, 199, 100), reduced_rect, 1)
-        #pygame.draw.rect(screen, (255, 0, 0), increased_rect, 1)
-        
-
+        # Uncomment to test the hitbox
+        # reduced_rect = self.get_reduced_rect(road)
+        # increased_rect = self.get_increased_rect(road)
+        # pygame.draw.rect(screen, (100, 199, 100), reduced_rect, 1)
+        # pygame.draw.rect(screen, (255, 0, 0), increased_rect, 1)

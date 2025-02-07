@@ -1,43 +1,46 @@
 import os
 
 import pygame
+
 import constants
 from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
-import os
 
 '''
 Menu class renders and handles the main menu
 '''
+
+
 class Menu:
     def __init__(self, screen):
-        '''
+        """
         Initialization of the menu components
-        '''
+        """
         self.screen = screen
         self.running: bool = True
-        self.nickname: str = None
+        self.nickname: str = ""
         pygame.display.set_caption("Menu")
         self.background = SpriteManager.load_image("main_menu.png")
         self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
 
         button_position = (constants.SCREEN_WIDTH - constants.BUTTON_WIDTH) // 2
-        self.buttons = [   
-            {"text": "Play as Guest", "action": "guest", "rect": pygame.Rect( button_position , 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
-            {"text": "Login", "action": "nickname", "rect": pygame.Rect(button_position , 360, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
-            {"text": "ScoreBoard", "action": "scoreboard", "rect": pygame.Rect( button_position , 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
-            {"text": "Quit", "action": "quit", "rect": pygame.Rect( button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)}
-        ]
+        self.buttons = [{"text": "Play as Guest", "action": "guest",
+                         "rect": pygame.Rect(button_position, 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                        {"text": "Login", "action": "nickname",
+                         "rect": pygame.Rect(button_position, 360, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                        {"text": "ScoreBoard", "action": "scoreboard",
+                         "rect": pygame.Rect(button_position, 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                        {"text": "Quit", "action": "quit",
+                         "rect": pygame.Rect(button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)}]
 
     def render(self):
-        '''
+        """
         Renders a menu
-        '''
+        """
         self.screen.blit(self.background, (0, 0))
 
         # Draw buttons
         for button in self.buttons:
-
             BACKGROUND_COLOR = (35, 20, 55)
             BORDER_COLOR = (242, 102, 150)
             TEXT_COLOR = (242, 102, 150)
@@ -45,15 +48,15 @@ class Menu:
             pygame.draw.rect(self.screen, BACKGROUND_COLOR, button["rect"])
             pygame.draw.rect(self.screen, BORDER_COLOR, button["rect"], 3)
             text = self.font.render(button["text"], True, TEXT_COLOR)
-            
+
             text_x = button["rect"].x + (button["rect"].width - text.get_width()) // 2  # Text centering
             text_y = button["rect"].y + (button["rect"].height - text.get_height()) // 2
             self.screen.blit(text, (text_x, text_y))
 
     def handle_event(self, event):
-        '''
+        """
         Handles menu key pressing
-        '''
+        """
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
@@ -63,7 +66,7 @@ class Menu:
                     if button["action"] == "guest":
                         self.running = False  # Guest mode
                     elif button["action"] == "nickname":
-                        self.enter_nickname() 
+                        self.enter_nickname()
                     elif button["action"] == "quit":
                         pygame.quit()
                         exit()
@@ -71,9 +74,9 @@ class Menu:
                         self.show_scoreboard()
 
     def enter_nickname(self):
-        '''
-            Gets users nickname
-        '''
+        """
+        Gets users nickname
+        """
         nickname = ""
         font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 24)
 
@@ -84,7 +87,7 @@ class Menu:
 
             nickname_surface = font.render(nickname, True, (255, 255, 0))
             self.screen.blit(nickname_surface, (constants.SCREEN_WIDTH // 2 - nickname_surface.get_width() // 2, 250))
-        
+
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -102,9 +105,9 @@ class Menu:
                         nickname += event.unicode
 
     def show_scoreboard(self):
-        '''
+        """
         Shows TOP 10 of the players
-        '''
+        """
         scoreboard = ScoreBoard()
         top_scores = scoreboard.get_top_scores()
 
@@ -118,7 +121,7 @@ class Menu:
 
             y_offset = 120
             for i, (name, score) in enumerate(top_scores):
-                text = font.render(f"{i+1}. {name}: {score}", True, (255, 255, 0))
+                text = font.render(f"{i + 1}. {name}: {score}", True, (255, 255, 0))
                 self.screen.blit(text, (constants.SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
                 y_offset += 40
 
@@ -137,9 +140,9 @@ class Menu:
                         return
 
     def run(self):
-        '''
+        """
         Game cycle
-        '''
+        """
         if self.nickname is None:
             self.nickname = "Guest"
 

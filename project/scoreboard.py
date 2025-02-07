@@ -1,5 +1,6 @@
 import os
 
+
 class ScoreBoard:
     """
     Class for managing the scoreboard.

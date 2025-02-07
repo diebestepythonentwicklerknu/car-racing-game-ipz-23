@@ -1,15 +1,16 @@
 import pygame
 import constants
 
+
 class InputManager:
-    '''
-    An interface to manage user inputs 
-    '''
+    """
+    An interface to manage user inputs
+    """
 
     def __init__(self):
-        '''
+        """
         Initializes the input manager components
-        '''
+        """
         self.actions = {pygame.K_LEFT: 'left',
                         pygame.K_RIGHT: 'right',
                         pygame.K_UP: 'accelerate',
@@ -20,9 +21,9 @@ class InputManager:
         self.pause_key_handled: bool = False  # Space key
 
     def handle_event(self, event):
-        '''
+        """
         Handles key events
-        '''
+        """
         if event.type == pygame.KEYDOWN:
             self.pressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
@@ -32,26 +33,29 @@ class InputManager:
             self.unpressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
                 self.pause_key_pressed = False
-                self.pause_key_handled = False 
+                self.pause_key_handled = False
 
+    def is_pause_pressed(self):
+        """
+        Checks if the Pause button is pressed. Returns TRUE only once
+        """
+        if self.pause_key_pressed and not self.pause_key_handled:
+            self.pause_key_handled = True  # Space is pressed
+            return True
+        return False
+
+    @staticmethod
     def handle_pause(func):
-        '''
+        """
         Decorator to pause the game
-        '''
+        """
+
         def wrapper(self, *args, **kwargs):
             if self.is_pause_pressed():
                 return
             return func(self, *args, **kwargs)
-        return wrapper 
 
-    def is_pause_pressed(self):
-        '''
-        Checks if the Pause button is pressed. Returns TRUE only once 
-        '''
-        if self.pause_key_pressed and not self.pause_key_handled:
-            self.pause_key_handled = True  #Space is pressed
-            return True
-        return False
+        return wrapper
 
     @handle_pause
     def update_car(self, car):
