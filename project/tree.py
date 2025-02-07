@@ -32,9 +32,9 @@ class Tree:
         return int(self.min_height + (self.max_height - self.min_height) * (1 - self.depth))
 
     def update(self, car_speed, road):
-        '''
+        """
         Update tree position and depth based on player speed and road curvature.
-        '''
+        """
         speed_factor = 0.0125  # Factor to adjust depth based on speed
 
         self.depth -= speed_factor * (car_speed / 200)
@@ -55,15 +55,15 @@ class Tree:
             self.x = lane_edges[-1] + self.offset  # Keep it to the right of the road
 
     def is_visible(self):
-        '''
+        """
         Returns True if the tree is visible on the screen.
-        '''
+        """
         return self.depth > 0 and (0 <= self.x <= SCREEN_WIDTH and 0 <= self.y <= SCREEN_HEIGHT)
 
     def render(self, screen):
-        '''
+        """
         Render the tree on the screen.
-        '''
+        """
         scaled_image = pygame.transform.scale(self.current_sprite, (self.width, self.height))
         scaled_image.set_colorkey((0, 0, 0))
         screen.blit(scaled_image, (self.x, self.y - self.height))

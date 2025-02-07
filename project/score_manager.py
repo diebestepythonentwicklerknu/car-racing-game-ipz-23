@@ -7,14 +7,15 @@ class ScoreManager:
     """
     Class for managing the score of the player.
     """
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    FILE_PATH = os.path.join(BASE_DIR, "best_score.txt")
 
-    def __init__(self, best_score_file="best_score.txt"):
-        '''
+    def __init__(self):
+        """
         Initializes the score manager components
-        '''
+        """
         self.score = 0.0
         self.best_score = 0
-        self.best_score_file = best_score_file
         self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
         self.color = (255, 255, 255)
 
@@ -26,7 +27,7 @@ class ScoreManager:
         Loads the best score from the file.
         """
         try:
-            with open(self.best_score_file, "r") as file:
+            with open(self.FILE_PATH, "r") as file:
                 self.best_score = int(file.read().strip())
         except FileNotFoundError:
             print("File with best score not found. Setting value to 0.")
@@ -40,7 +41,7 @@ class ScoreManager:
         Saves the best score to a file.
         """
         try:
-            with open(self.best_score_file, "w") as file:
+            with open(self.FILE_PATH, "w") as file:
                 file.write(str(self.best_score))
         except IOError as e:
             print(f"Write to file error: {e}")
@@ -52,7 +53,7 @@ class ScoreManager:
         score_increase = (car_speed / car_max_speed) * 0.5
         score_increase = max(0.01, score_increase)
 
-        self.score += score_increase  
+        self.score += score_increase
         if self.score > self.best_score:
             self.best_score = int(self.score)
             self._save_best_score()

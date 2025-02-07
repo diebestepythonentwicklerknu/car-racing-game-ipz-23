@@ -7,20 +7,22 @@ from obstacle import Obstacle
 '''
 ObstacleManager class is responsible for managing obstacles
 '''
+
+
 class ObstacleManager:
 
     def __init__(self):
-        '''
+        """
         Initializes the obstacle manager components
-        '''
+        """
         self.obstacles = []
         self.near_obstacles = set()
         self.messages = []
 
     def update(self, player, road, score_manager, car_speed):
-        '''
+        """
         Updates obstacle positions
-        '''
+        """
         collision_detected = False
         player_rect = player.get_rect()
         for obstacle in self.obstacles:
@@ -60,15 +62,16 @@ class ObstacleManager:
         return collision_detected
 
     def check_collision(self, player, road):
-        '''
+        """
         Checks if objects collides with the player
-        '''
-        return any(obstacle.get_rect(road).colliderect(player.get_rect()) for obstacle in self.obstacles) # FIX: a bit siplified visualy, but it works
+        """
+        return any(obstacle.get_rect(road).colliderect(player.get_rect()) for obstacle in
+                   self.obstacles)  # FIX: a bit siplified visualy, but it works
 
     def render(self, screen, road):
-        '''
+        """
         Renders obstacles
-        '''
+        """
         for obstacle in sorted(self.obstacles, key=lambda x: x.depth, reverse=True):
             obstacle.render(screen, road)
 
@@ -81,4 +84,4 @@ class ObstacleManager:
                 text_surface = message_font.render(message["text"], True, (255, 255, 0))
                 screen.blit(text_surface, message["position"])
             else:
-                self.messages.remove(message) 
+                self.messages.remove(message)
