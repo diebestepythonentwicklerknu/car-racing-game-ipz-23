@@ -35,32 +35,72 @@ class Road:
                 (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
 
     @staticmethod
-    def calculate_control_points(turn_name):
+    def calculate_control_points(turn_name, camera_offset_x=0):
         """
-        Returns the control points for the given type of turn.
+        Returns the control points for the given type of turn, adjusted for camera offset.
         """
         control_points = {
-            "hard_left": {"left": [(0, 600), (300, 500), (0, 400)], "right": [(800, 600), (600, 400), (150, 400)], },
-            "long_left": {"left": [(0, 600), (300, 500), (220, 400)], "right": [(800, 600), (500, 400), (300, 400)], },
-            "long_right": {"left": [(0, 600), (300, 400), (500, 400)], "right": [(800, 600), (500, 500), (580, 400)], },
-            "hard_right": {"left": [(0, 600), (200, 400), (650, 400)], "right": [(800, 600), (500, 500), (800, 400)], },
-            "straight": {"left": [(0, 600), (187, 500), (375, 400)], "right": [(800, 600), (613, 500), (425, 400)], }, }
-        return control_points.get(turn_name, control_points["straight"])
+            "hard_left": {
+                "left": [(0 + camera_offset_x * 0.175, 600),
+                         (((0 + camera_offset_x * 0.175) + (0 - camera_offset_x * 0.75)) + 300, 500), # 300
+                         (0 - camera_offset_x * 0.75, 400)],
+                "right": [(800 + camera_offset_x * 0.175, 600),
+                          (((800 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.75))*60/95, 400), # 600
+                          (150 - camera_offset_x * 0.75, 400)],
+            },
+            "long_left": {
+                "left": [(-50 + camera_offset_x * 0.125, 600),
+                         (((50 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.5)) * 1.5, 500), # 300
+                         (220 - camera_offset_x * 0.65, 400)],
+                "right": [(800 + camera_offset_x * 0.125, 600),
+                          (500 - camera_offset_x * 0.462, 400), # 500
+                          (300 - camera_offset_x * 0.65, 400)],
+            },
+            "long_right": {
+                "left": [(0 + camera_offset_x * 0.175, 600),
+                         (((0 + camera_offset_x * 0.175) + (500 - camera_offset_x * 0.75)) * 3/5, 400), # 300
+                         (480 - camera_offset_x * 0.65, 400)],
+                "right": [(800 + camera_offset_x * 0.125, 600),
+                          (((800 + camera_offset_x * 0.175) + (610 - camera_offset_x * 1.5)) * 50/125, 500), # 500
+                          (610 - camera_offset_x * 0.65, 400)],
+            },
+            "hard_right": {
+                "left": [(0 + camera_offset_x * 0.175, 600),
+                         (((0 + camera_offset_x * 0.175) + (650 - camera_offset_x * 0.75))*4/13, 400), # 200
+                         (650 - camera_offset_x * 0.7, 400)],
+                "right": [(800 + camera_offset_x * 0.175, 600),
+                          (((800 + camera_offset_x * 0.175) + (800 - camera_offset_x * 1.5)) / 3, 500), # 500
+                          (800 - camera_offset_x * 0.7, 400)],
+            },
+            "straight": {
+                "left": [(0 + camera_offset_x * 0.175, 600),
+                         (((0 + camera_offset_x * 0.175) + (375 - camera_offset_x * 0.75)) / 2, 500),
+                         (375 - camera_offset_x * 0.75, 400)],
+                "right": [(800 + camera_offset_x * 0.175, 600),
+                          (((800 + camera_offset_x * 0.175) + (425 - camera_offset_x * 0.75)) / 2, 500),
+                          (425 - camera_offset_x * 0.75, 400)],
+            },
+        }
+        return control_points.get("hard_left", control_points["straight"])
 
     def get_lane_positions(self, depth, camera_offset_x):
         """
-        Calculates lane boundaries for a given depth.
+        Calculates lane boundaries for a given depth, adjusted for camera offset.
         """
-        current_control = self.calculate_control_points(self.current_turn)
-        next_control = self.calculate_control_points(self.next_turn)
+        current_control = self.calculate_control_points(self.current_turn, camera_offset_x)
+        next_control = self.calculate_control_points(self.next_turn, camera_offset_x)
 
         # Interpolate control points between current and next turn
         interpolated_left = [
-            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress, camera_offset_x) for i
-            in range(3)]
+            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress,
+                                    camera_offset_x)
+            for i in range(3)
+        ]
         interpolated_right = [
-            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress, camera_offset_x) for
-            i in range(3)]
+            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress,
+                                    camera_offset_x)
+            for i in range(3)
+        ]
 
         # Calculate Bézier curve points for the given depth
         t = min(depth, 1)
@@ -77,7 +117,6 @@ class Road:
             lane_edges.append(lane_edges[-1] + road_width * (ratio / total_ratio))
 
         return lane_edges, left_edge[1]
-
     @staticmethod
     def interpolate_points(p1, p2, t, camera_offset_x):
         """
@@ -109,8 +148,8 @@ class Road:
         Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
         """
         # Extract control points for the current and next turns
-        current_controls = self.calculate_control_points(self.current_turn)
-        next_controls = self.calculate_control_points(self.next_turn)
+        current_controls = self.calculate_control_points(self.current_turn, camera_offset_x)
+        next_controls = self.calculate_control_points(self.next_turn, camera_offset_x)
 
         # Extract left and right control points from the dictionaries
         current_left, current_right = current_controls["left"], current_controls["right"]
@@ -118,9 +157,13 @@ class Road:
 
         # Інтерполяція між контрольними точками
         interpolated_left = [
-            self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera_offset_x) for i in range(3)]
+            self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera_offset_x)
+            for i in range(3)
+        ]
         interpolated_right = [
-            self.interpolate_points(current_right[i], next_right[i], self.transition_progress, camera_offset_x) for i in range(3)]
+            self.interpolate_points(current_right[i], next_right[i], self.transition_progress, camera_offset_x)
+            for i in range(3)
+        ]
 
         # Розрахунок точок для лівої та правої меж
         num_segments = 50  # Кількість точок на кривій для плавності
@@ -128,21 +171,25 @@ class Road:
         right_curve = [self.bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
 
         # Розрахунок точок для центральних ліній (розділових смуг)
-        central_curve_left = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
-                               left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,) for i in
-                              range(len(left_curve))]
-
-        central_curve_right = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
-                                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,) for i in
-                               range(len(left_curve))]
+        central_curve_left = [
+            (left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
+             left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,)
+            for i in range(len(left_curve))
+        ]
+        central_curve_right = [
+            (left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
+             left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,)
+            for i in range(len(left_curve))
+        ]
 
         # Draw road
         for i in range(num_segments):
-            pygame.draw.polygon(screen, self.road_color, [left_curve[i],  # Ліва нижня точка
-                                                          left_curve[i + 1],  # Ліва верхня точка
-                                                          right_curve[i + 1],  # Права верхня точка
-                                                          right_curve[i],  # Права нижня точка
-                                                          ], )
+            pygame.draw.polygon(screen, self.road_color, [
+                left_curve[i],  # Ліва нижня точка
+                left_curve[i + 1],  # Ліва верхня точка
+                right_curve[i + 1],  # Права верхня точка
+                right_curve[i],  # Права нижня точка
+            ])
 
         # Draw dividing lines for lanes
         for i in range(num_segments):

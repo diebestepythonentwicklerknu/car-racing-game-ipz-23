@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+from camera import Camera
 from car import Ferrari458Italia
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from input_manager import InputManager
@@ -24,7 +25,6 @@ class Game:
         self.paused = False
         self.game_over = False  # FIX: Додаємо флаг для екрану завершення гри
         self.nickname = nickname
-        self.camera_offset_x = 0
         self._initialize_game_components()
 
     def _initialize_game_components(self):
@@ -36,6 +36,7 @@ class Game:
         tree_sprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
         grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
 
+        self.camera = Camera()
         self.car = Ferrari458Italia()
         self.car.speed = 0
         self.road = Road()
@@ -58,6 +59,8 @@ class Game:
                         self.go_to_main_menu()
             else:
                 self.input_manager.handle_event(event)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                    self.camera.switch_mode()  # Переключення режиму камери
 
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
@@ -72,9 +75,11 @@ class Game:
 
         if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
             self.road.update(self.car.speed, delta_time)
-            self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera_offset_x)
+            self.camera.update(self.car, self.road)
+            self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera.camera_offset_x)
 
-            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed, self.camera_offset_x):
+            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed,
+                                            self.camera.camera_offset_x):
                 pygame.time.delay(100)
                 self.show_game_over_screen()
 
@@ -86,8 +91,8 @@ class Game:
         elif not self.paused:
             self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
-            self.road.render(self.screen, self.camera_offset_x)
-            self.obstacle_manager.render(self.screen, self.road, self.camera_offset_x)
+            self.road.render(self.screen, self.camera.camera_offset_x)
+            self.obstacle_manager.render(self.screen, self.road, self.camera.camera_offset_x)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:
