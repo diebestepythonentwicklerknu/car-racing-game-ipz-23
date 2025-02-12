@@ -1,14 +1,20 @@
 import os
 import random
 import time
-
 import pygame
-
 from obstacle import Obstacle
+
+'''
+ObstacleManager class is responsible for managing obstacles
+'''
 
 
 class ObstacleManager:
+
     def __init__(self):
+        """
+        Initializes the obstacle manager components
+        """
         self.obstacles = []
         self.near_obstacles = set()
         self.messages = []
@@ -38,12 +44,12 @@ class ObstacleManager:
                         "position": (player_rect.centerx, player_rect.top - 20)  # Above the player
                     })
 
-        # Видалення перешкод
+        # Remove obstacles that are out of the screen
         self.obstacles = [o for o in self.obstacles if o.depth > 0.1]
 
         self.near_obstacles = {o for o in self.near_obstacles if o in self.obstacles}
 
-        # Генерація перешкод
+        # Generate new obstacles
         if random.random() < 0.01:
             if len(self.obstacles) < 2:
                 lane = random.randint(0, 2)
@@ -57,27 +63,25 @@ class ObstacleManager:
 
     def check_collision(self, player, road):
         """
-        Перевіряє, чи є зіткнення між гравцем і будь-якою перешкодою. Не ворк
+        Checks if objects collides with the player
         """
-        for obstacle in self.obstacles:
-            if obstacle.get_rect(road).colliderect(player.get_rect()):
-                return True
-        return False
+        return any(obstacle.get_rect(road).colliderect(player.get_rect()) for obstacle in
+                   self.obstacles)  # FIX: a bit siplified visualy, but it works
 
     def render(self, screen, road, camera_offset_x):
         """
-        Малює всі перешкоди.
+        Renders obstacles
         """
         for obstacle in sorted(self.obstacles, key=lambda x: x.depth, reverse=True):
             obstacle.render(screen, road, camera_offset_x)
 
-        # Малює повідомлення про бонусні очки
+        # Display messages about the bonus points
         current_time = time.time()
         for message in self.messages[:]:
-            if current_time - message["time"] <= 1:  # Відображає повідомлення протягом 1 секунди
+            if current_time - message["time"] <= 1:  # 1 second message lifetime
                 message_font = pygame.font.Font(
                     os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
                 text_surface = message_font.render(message["text"], True, (255, 255, 0))
                 screen.blit(text_surface, message["position"])
             else:
-                self.messages.remove(message)  # Видаляє повідомлення після закінчення часу (1 секунда)
+                self.messages.remove(message)

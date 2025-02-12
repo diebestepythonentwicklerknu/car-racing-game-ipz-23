@@ -3,8 +3,8 @@ import os
 import pygame
 
 from camera import Camera
+import constants
 from car import Ferrari458Italia
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from input_manager import InputManager
 from menu import Menu
 from obstacle_manager import ObstacleManager
@@ -16,29 +16,36 @@ from utils.sprite_manager import SpriteManager
 
 
 class Game:
+    """
+    Game class is responsible for managing the game components
+    """
+
     def __init__(self, nickname=None):
+        """
+        Initializes the game
+        """
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
         pygame.display.set_caption("Racing")
         self.clock = pygame.time.Clock()
         self.running = True
         self.paused = False
-        self.game_over = False  # FIX: Додаємо флаг для екрану завершення гри
+        self.game_over = False
         self.nickname = nickname
         self._initialize_game_components()
 
     def _initialize_game_components(self):
+        """
+        Initializes the game components
+        """
         sky_sprite = pygame.transform.scale(SpriteManager.load_image('sky.png'), (800, 550))
-        hills_sprites = [
-            pygame.transform.scale(SpriteManager.load_image('hills_l.png'), (800, 400)),
-            pygame.transform.scale(SpriteManager.load_image('hills_r.png'), (800, 400)),
-        ]
+        hills_sprites = [pygame.transform.scale(SpriteManager.load_image('hills_l.png'), (800, 400)),
+                         pygame.transform.scale(SpriteManager.load_image('hills_r.png'), (800, 400)), ]
         tree_sprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
         grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
 
         self.camera = Camera()
         self.car = Ferrari458Italia()
-        self.car.speed = 0
         self.road = Road()
         self.obstacle_manager = ObstacleManager()
         self.input_manager = InputManager()
@@ -47,14 +54,17 @@ class Game:
         self.scoreboard = ScoreBoard()
 
     def handle_events(self):
+        """
+        Handles the game events
+        Processes the keys pressed by the user
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-
-            elif self.game_over:  # Якщо гра закінчена, перевіряємо натискання R або Q
+            elif self.game_over:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
-                        self.restart_game()  # R for restart Q for quit
+                        self.restart_game()
                     elif event.key == pygame.K_q:
                         self.go_to_main_menu()
             else:
@@ -65,16 +75,30 @@ class Game:
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
 
-    def update(self):
-        if self.game_over or self.paused:
-            return
+    @staticmethod
+    def game_state_guard(func):
+        """
+        Decorator to prevent updating the game state when the game is over or paused.
+        """
 
+        def wrapper(self, *args, **kwargs):
+            if self.game_over or self.paused:
+                return
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    @game_state_guard
+    def update(self):
+        """
+        Updates the game elements states
+        """
         delta_time = self.clock.get_time() / 1000
         self.input_manager.update_car(self.car)
         self.car.update(self.road, delta_time, self.camera)
         self.camera.update(self.car)
 
-        if self.car.speed != 0:  # FIX: if the speed is set to 0, then do not update parallax & score
+        if self.car.speed != 0:
             self.road.update(self.car.speed, delta_time)
             self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera.camera_offset_x)
 
@@ -86,8 +110,11 @@ class Game:
             self.score_manager.update(self.car.speed, self.car.max_speed)
 
     def render(self):
+        """
+        Renders the game elements on the screen
+        """
         if self.game_over:
-            self.show_game_over_message()  # FIX: Відображаємо екран завершення гри
+            self.show_game_over_message()
         elif not self.paused:
             self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
@@ -96,63 +123,67 @@ class Game:
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:
-            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
-                                                       "assets", "PressStart2P-Regular.ttf"), 40)
+            pause_font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"),
+                                          40)
             pause_text = pause_font.render("Paused", True, (255, 255, 255))
-            self.screen.blit(pause_text, (SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50))
+            self.screen.blit(pause_text, (constants.SCREEN_WIDTH // 2 - 100, constants.SCREEN_HEIGHT // 2 - 50))
 
     def run(self):
+        """
+        Runs the game
+        Main game loop
+        """
         while self.running:
             self.handle_events()
             self.update()
             self.render()
             pygame.display.flip()
-            self.clock.tick(FPS)
+            self.clock.tick(constants.FPS)
 
         if self.nickname:
             self.scoreboard.update_score(self.nickname, int(self.score_manager.score))
         pygame.quit()
 
     def show_game_over_screen(self):
-        """ 
-        Встановлює флаг завершення гри і очікує натискання R або Q 
+        """
+        Flag that the game is over
         """
         self.game_over = True
 
     def show_game_over_message(self):
-        """ 
-        Малює екран завершення гри 
+        """
+        Shows the game over screen
         """
         self.screen.fill((0, 0, 0))
-        font = pygame.font.Font(os.path.join(os.path.dirname(__file__),
-                                             "assets", "PressStart2P-Regular.ttf"), 30)
+        font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 30)
         text1 = font.render("Game Over!", True, (255, 0, 0))
         text2 = font.render("Press R to Restart", True, (255, 255, 255))
         text3 = font.render("Press Q for Menu", True, (255, 255, 255))
 
-        self.screen.blit(text1, (SCREEN_WIDTH // 2 - 150, SCREEN_HEIGHT // 2 - 100))
-        self.screen.blit(text2, (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2))
-        self.screen.blit(text3, (SCREEN_WIDTH // 2 - 230, SCREEN_HEIGHT // 2 + 50))
+        center = (constants.SCREEN_WIDTH // 2, constants.SCREEN_HEIGHT // 2)
+
+        self.screen.blit(text1, (center[0] - 150, center[1] - 100))
+        self.screen.blit(text2, (center[0] - 250, center[1]))
+        self.screen.blit(text3, (center[0] - 230, center[1] + 50))
 
     def restart_game(self):
-        """ 
-        Скидає гру без виходу в головне меню
+        """
+        Restarts the game
         """
         self._initialize_game_components()
         self.game_over = False
 
     def go_to_main_menu(self):
         """
-        Повертає в меню після завершення гри
+        Goes back to the main menu
         """
-        self.scoreboard.update_score(self.nickname, int(self.score_manager.score))
-
+        self.scoreboard.update_score(self.nickname, self.score_manager.score)
         menu = Menu(self.screen)
         menu.run()
 
         if menu.nickname and menu.nickname != "Guest":
             self.__init__(menu.nickname)
-            self.run()
         else:
             self.__init__("Guest")
-            self.run()
+
+        self.run()

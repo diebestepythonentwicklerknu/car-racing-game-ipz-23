@@ -1,3 +1,4 @@
+# General screen constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 FPS = 60
@@ -8,9 +9,18 @@ ROAD_TOP_WIDTH = 50
 # Cars constasnts
 CAR_POSITION = (SCREEN_WIDTH / 2, SCREEN_HEIGHT - 100)  # 100px - is a buffer zone for a car
 CAR_SIZE = (128, 48)
+CAR_STOP_FACTOR = 0.5
+CAR_INERTIA_FACTOR = 0.05
 
-# menu constants
+# Menu constants
 
 BUTTON_WIDTH = 250
 BUTTON_HEIGHT = 50
 BUTTON_PADDING = 10
+
+# ANIMATIONS
+
+FRAME_FACTOR = 5
+MOUNTAIN_PARALLAX_FACTOR = 0.3
+FRAME_STEP_SLOW = 0.5
+FRAME_STEP = 1

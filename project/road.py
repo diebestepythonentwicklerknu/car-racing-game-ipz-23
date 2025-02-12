@@ -11,7 +11,7 @@ class Road:
         self.turn_timer = 0  # Turn timer
         self.road_color = (35, 20, 55)
         self.lane_mark_color = (242, 102, 150)
-        self.horizon_y = 400  # Позиція горизонту (нижче середини екрана)
+        self.horizon_y = 400  # Horizon line a bit below the center
         self.transition_progress = 0.0
         self.transition_duration = 5.0
         self.turn_delay = 5.0
@@ -133,9 +133,7 @@ class Road:
             self.delay_timer += delta_time
             if self.delay_timer >= self.turn_delay:
                 self.current_turn = self.next_turn
-                print(f"Current Turn: {self.current_turn}")
                 self.next_turn = self.generate_turn()
-                print(f"Next Turn: {self.next_turn}")
                 self.transition_progress = 0.0
                 self.delay_timer = 0.0
 
@@ -145,7 +143,7 @@ class Road:
 
     def render(self, screen, camera):
         """
-        Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
+        Draws the road with curved edges using Bezier curves and adds solid lines.
         """
         # Extract control points for the current and next turns
         current_controls = self.calculate_control_points(self.current_turn, camera.camera_offset_x)
@@ -155,7 +153,7 @@ class Road:
         current_left, current_right = current_controls["left"], current_controls["right"]
         next_left, next_right = next_controls["left"], next_controls["right"]
 
-        # Інтерполяція між контрольними точками
+        # Interpolate control points between current and next turn
         interpolated_left = [
             self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera.camera_offset_x)
             for i in range(3)
@@ -165,31 +163,26 @@ class Road:
             for i in range(3)
         ]
 
-        # Розрахунок точок для лівої та правої меж
-        num_segments = 50  # Кількість точок на кривій для плавності
+        # Calculate Bezier curve points for the left and right edges
+        num_segments = 50  # Number of segments to draw the road
         left_curve = [self.bezier_point(t / num_segments, *interpolated_left) for t in range(num_segments + 1)]
         right_curve = [self.bezier_point(t / num_segments, *interpolated_right) for t in range(num_segments + 1)]
 
-        # Розрахунок точок для центральних ліній (розділових смуг)
-        central_curve_left = [
-            (left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
-             left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,)
-            for i in range(len(left_curve))
-        ]
-        central_curve_right = [
-            (left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
-             left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,)
-            for i in range(len(left_curve))
-        ]
+        # Calculate central curve points for lane dividing lines
+        central_curve_left = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 1 / 3,
+                               left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 1 / 3,) for i in
+                              range(len(left_curve))]
 
-        # Draw road
+        central_curve_right = [(left_curve[i][0] + (right_curve[i][0] - left_curve[i][0]) * 2 / 3,
+                                left_curve[i][1] + (right_curve[i][1] - left_curve[i][1]) * 2 / 3,) for i in
+                               range(len(left_curve))]
+
         for i in range(num_segments):
-            pygame.draw.polygon(screen, self.road_color, [
-                left_curve[i],  # Ліва нижня точка
-                left_curve[i + 1],  # Ліва верхня точка
-                right_curve[i + 1],  # Права верхня точка
-                right_curve[i],  # Права нижня точка
-            ])
+            pygame.draw.polygon(screen, self.road_color, [left_curve[i],
+                                                          left_curve[i + 1],
+                                                          right_curve[i + 1],
+                                                          right_curve[i],
+                                                          ], )
 
         # Draw dividing lines for lanes
         for i in range(num_segments):

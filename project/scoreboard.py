@@ -2,14 +2,19 @@ import os
 
 
 class ScoreBoard:
-    FILE_PATH = os.path.join(os.path.dirname(__file__), "players_scoreboard.txt")
+    """
+    Class for managing the scoreboard.
+    Stores and shows the best scores of the players.
+    """
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    FILE_PATH = os.path.join(BASE_DIR, "players_scoreboard.txt")
 
     def __init__(self):
         self.scores = self.load_scores()
 
     def load_scores(self):
         """
-        Завантажує результати з текстового файлу або створює новий файл
+        Loads the scores from the file.
         """
         scores = {}
 
@@ -17,7 +22,7 @@ class ScoreBoard:
             with open(self.FILE_PATH, "r", encoding="utf-8") as file:
                 for line in file:
                     parts = line.strip().split()
-                    if len(parts) == 2 and parts[1].isdigit():  # Перевірка правильного формату
+                    if len(parts) == 2 and parts[1].isdigit():  # Check if the line is valid (format)
                         nickname, score = parts[0], int(parts[1])
                         scores[nickname] = score
         else:
@@ -27,7 +32,7 @@ class ScoreBoard:
 
     def save_scores(self):
         """
-        Зберігає оновлені результати у текстовий файл.
+        Saves updated scores to the file.
         """
         with open(self.FILE_PATH, "w", encoding="utf-8") as file:
             for nickname, score in self.scores.items():
@@ -35,18 +40,22 @@ class ScoreBoard:
 
     def update_score(self, nickname, score):
         """
-        Оновлює найкращий результат гравця, якщо новий результат більший.
-        Якщо гравця ще немає в таблиці, додає його.
+        Updates the best score of the player.
+        If the player is not in the scoreboard, adds him.
         """
-        if nickname != "Guest":  # Гравці без нікнейму не зберігаються
+        rounded_score = round(score)
+
+        if nickname != "Guest":  # If played without nickname, don't save the score
             if nickname in self.scores:
                 if score > self.scores[nickname]:
-                    self.scores[nickname] = score
+                    self.scores[nickname] = rounded_score
             else:
-                self.scores[nickname] = score
+                self.scores[nickname] = rounded_score
 
             self.save_scores()
 
     def get_top_scores(self, top_n=10):
-        """Повертає список топ-N найкращих результатів."""
+        """
+        Returns the top n scores for the scoreboard.
+        """
         return sorted(self.scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
