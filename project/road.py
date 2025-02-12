@@ -1,21 +1,21 @@
 import random
 
 import pygame
-
+import constants
 
 class Road:
 
     def __init__(self):
-        self.segments = [{"curve": 0} for _ in range(5)]
-        self.offset = 0
-        self.turn_timer = 0  # Turn timer
-        self.road_color = (35, 20, 55)
-        self.lane_mark_color = (242, 102, 150)
-        self.horizon_y = 400  # Horizon line a bit below the center
-        self.transition_progress = 0.0
-        self.transition_duration = 5.0
-        self.turn_delay = 5.0
-        self.delay_timer = 0
+        self.__segments = [{"curve": 0} for _ in range(5)]
+        self.__offset = 0
+        self.__turn_timer = 0  # Turn timer
+        self.__road_color = (35, 20, 55)
+        self.__lane_mark_color = (242, 102, 150)
+        self.__horizon_y = constants.ROAD_HORIZON_Y  # Horizon line a bit below the center
+        self.__transition_progress = 0.0
+        self.__transition_duration = 5.0
+        self.__turn_delay = 5.0
+        self.__delay_timer = 0
         self.current_turn = "straight"
         self.next_turn = "straight"
 
@@ -92,12 +92,12 @@ class Road:
 
         # Interpolate control points between current and next turn
         interpolated_left = [
-            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress,
+            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.__transition_progress,
                                     camera_offset_x)
             for i in range(3)
         ]
         interpolated_right = [
-            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress,
+            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.__transition_progress,
                                     camera_offset_x)
             for i in range(3)
         ]
@@ -125,21 +125,21 @@ class Road:
         return ((1 - t) * p1[0] + t * p2[0]) + camera_offset_x, ((1 - t) * p1[1] + t * p2[1]),
 
     def update(self, speed, delta_time):
-        self.offset += speed / 60
+        self.__offset += speed / 60
 
-        if self.transition_progress < 1.0:
-            self.transition_progress += delta_time / self.transition_duration
+        if self.__transition_progress < 1.0:
+            self.__transition_progress += delta_time / self.__transition_duration
         else:
-            self.delay_timer += delta_time
-            if self.delay_timer >= self.turn_delay:
+            self.__delay_timer += delta_time
+            if self.__delay_timer >= self.__turn_delay:
                 self.current_turn = self.next_turn
                 self.next_turn = self.generate_turn()
-                self.transition_progress = 0.0
-                self.delay_timer = 0.0
+                self.__transition_progress = 0.0
+                self.__delay_timer = 0.0
 
-        if self.offset >= len(self.segments):
-            self.offset -= len(self.segments)
-            self.segments.append(self.segments.pop(0))  # Rotate segments
+        if self.__offset >= len(self.__segments):
+            self.__offset -= len(self.__segments)
+            self.__segments.append(self.__segments.pop(0))  # Rotate segments
 
     def render(self, screen, camera):
         """
@@ -155,11 +155,11 @@ class Road:
 
         # Interpolate control points between current and next turn
         interpolated_left = [
-            self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera.camera_offset_x)
+            self.interpolate_points(current_left[i], next_left[i], self.__transition_progress, camera.camera_offset_x)
             for i in range(3)
         ]
         interpolated_right = [
-            self.interpolate_points(current_right[i], next_right[i], self.transition_progress, camera.camera_offset_x)
+            self.interpolate_points(current_right[i], next_right[i], self.__transition_progress, camera.camera_offset_x)
             for i in range(3)
         ]
 
@@ -178,7 +178,7 @@ class Road:
                                range(len(left_curve))]
 
         for i in range(num_segments):
-            pygame.draw.polygon(screen, self.road_color, [left_curve[i],
+            pygame.draw.polygon(screen, self.__road_color, [left_curve[i],
                                                           left_curve[i + 1],
                                                           right_curve[i + 1],
                                                           right_curve[i],
@@ -186,5 +186,5 @@ class Road:
 
         # Draw dividing lines for lanes
         for i in range(num_segments):
-            pygame.draw.line(screen, self.lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
-            pygame.draw.line(screen, self.lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
+            pygame.draw.line(screen, self.__lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
+            pygame.draw.line(screen, self.__lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
