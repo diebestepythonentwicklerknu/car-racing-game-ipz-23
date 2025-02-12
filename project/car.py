@@ -3,6 +3,8 @@ import math
 import pygame
 
 from constants import CAR_POSITION, CAR_SIZE
+from camera import Camera
+from project.constants import SCREEN_WIDTH
 from utils.sprite_manager import SpriteManager
 
 
@@ -20,6 +22,7 @@ class Car:
         self.y = CAR_POSITION[1]
         self.width = CAR_SIZE[0]
         self.height = CAR_SIZE[1]
+        self.road_offset_x = 0
         self.current_sprite_frame = 0
         self.sprites = sprites
         self.speed = 0
@@ -30,6 +33,7 @@ class Car:
         self.max_offset = 245
         self.road_center = CAR_POSITION[0]
         self.font = pygame.font.Font(None, 26)
+        self.camera = Camera()
 
         # Car characteristics
         self.mass = mass  # Маса автомобіля в кг
@@ -87,12 +91,12 @@ class Car:
         elif self.steering_angle < 0:
             self.steering_angle = min(self.steering_angle + 0.1, 0)
 
-    def update(self, road, delta_time):
+    def update(self, road, delta_time, camera):
         """
         Updates car's state based on road conditions and user input.
         """
         self._update_speed()
-        self._update_position()
+        self._update_position(camera)
         self.apply_road_force(road, delta_time)
         self.reset_steering()
 
@@ -205,9 +209,11 @@ class Car:
 
         # Зміщення автомобіля
         self.x += force
+        self.road_offset_x -= force
 
         # Обмеження в межах дороги
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
+        self.road_offset_x = min(-(self.road_center - self.max_offset), max(self.road_offset_x, -(self.road_center + self.max_offset)))
 
     def _update_speed(self):
         """
@@ -237,7 +243,7 @@ class Car:
         if self.throttle == 0 and self.speed > 0:
             self.apply_inertia()
 
-    def _update_position(self):
+    def _update_position(self, camera):
         """
         Оновлює положення автомобіля з урахуванням повороту.
         """
@@ -245,9 +251,10 @@ class Car:
             radius = self.wheelbase / math.tan(math.radians(self.steering_angle))
             angular_velocity = (self.speed / 3.6) / radius  # Радіани в секунду
             self.x += angular_velocity * radius * math.sin(math.radians(self.steering_angle))
+            self.road_offset_x -= (angular_velocity * radius * math.sin(math.radians(self.steering_angle)))
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
-
+        self.road_offset_x = min(-(self.road_center - self.max_offset), max(self.road_offset_x, -(self.road_center + self.max_offset)))
 
 class Ferrari458Italia(Car):
     def __init__(self):

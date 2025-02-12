@@ -35,7 +35,7 @@ class Road:
                 (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
 
     @staticmethod
-    def calculate_control_points(turn_name, camera_offset_x=0):
+    def calculate_control_points(turn_name, camera_offset_x = 0):
         """
         Returns the control points for the given type of turn, adjusted for camera offset.
         """
@@ -81,7 +81,7 @@ class Road:
                           (425 - camera_offset_x * 0.75, 400)],
             },
         }
-        return control_points.get("hard_left", control_points["straight"])
+        return control_points.get(turn_name, control_points["straight"])
 
     def get_lane_positions(self, depth, camera_offset_x):
         """
@@ -143,13 +143,13 @@ class Road:
             self.offset -= len(self.segments)
             self.segments.append(self.segments.pop(0))  # Rotate segments
 
-    def render(self, screen, camera_offset_x):
+    def render(self, screen, camera):
         """
         Малює дорогу з вигнутими межами, використовуючи криві Безьє, та додає суцільні лінії.
         """
         # Extract control points for the current and next turns
-        current_controls = self.calculate_control_points(self.current_turn, camera_offset_x)
-        next_controls = self.calculate_control_points(self.next_turn, camera_offset_x)
+        current_controls = self.calculate_control_points(self.current_turn, camera.camera_offset_x)
+        next_controls = self.calculate_control_points(self.next_turn, camera.camera_offset_x)
 
         # Extract left and right control points from the dictionaries
         current_left, current_right = current_controls["left"], current_controls["right"]
@@ -157,11 +157,11 @@ class Road:
 
         # Інтерполяція між контрольними точками
         interpolated_left = [
-            self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera_offset_x)
+            self.interpolate_points(current_left[i], next_left[i], self.transition_progress, camera.camera_offset_x)
             for i in range(3)
         ]
         interpolated_right = [
-            self.interpolate_points(current_right[i], next_right[i], self.transition_progress, camera_offset_x)
+            self.interpolate_points(current_right[i], next_right[i], self.transition_progress, camera.camera_offset_x)
             for i in range(3)
         ]
 

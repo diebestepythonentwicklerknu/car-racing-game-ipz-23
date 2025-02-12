@@ -32,6 +32,7 @@ class Obstacle:
         """
         Обчислення хітбоксу, меншого за візуал
         :param road:
+        :param camera_offset_x:
         :return:
         """
         rect = self.get_rect(road, camera_offset_x)
@@ -48,6 +49,7 @@ class Obstacle:
         Обчислення хітбоксу, більшого за візуал
         Використовується для близького обгону
         :param road:
+        :param camera_offset_x:
         :return:
         """
         rect = self.get_rect(road, camera_offset_x)

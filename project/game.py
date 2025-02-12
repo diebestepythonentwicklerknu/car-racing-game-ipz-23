@@ -60,7 +60,7 @@ class Game:
             else:
                 self.input_manager.handle_event(event)
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
-                    self.camera.switch_mode()  # Переключення режиму камери
+                    self.camera.switch_mode(self.car)  # Переключення режиму камери
 
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
@@ -71,11 +71,11 @@ class Game:
 
         delta_time = self.clock.get_time() / 1000
         self.input_manager.update_car(self.car)
-        self.car.update(self.road, delta_time)
+        self.car.update(self.road, delta_time, self.camera)
+        self.camera.update(self.car)
 
-        if self.car.speed != 0:  # FIX: if the speed is set to 0, than do not update parallax & score
+        if self.car.speed != 0:  # FIX: if the speed is set to 0, then do not update parallax & score
             self.road.update(self.car.speed, delta_time)
-            self.camera.update(self.car, self.road)
             self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera.camera_offset_x)
 
             if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed,
@@ -91,7 +91,7 @@ class Game:
         elif not self.paused:
             self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
-            self.road.render(self.screen, self.camera.camera_offset_x)
+            self.road.render(self.screen, self.camera)
             self.obstacle_manager.render(self.screen, self.road, self.camera.camera_offset_x)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
