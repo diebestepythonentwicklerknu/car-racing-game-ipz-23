@@ -44,6 +44,7 @@ class InputManager:
             return True
         return False
 
+
     @staticmethod
     def handle_pause(func):
         """

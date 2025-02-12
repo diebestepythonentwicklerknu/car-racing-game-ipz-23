@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+from camera import Camera
 import constants
 from car import Ferrari458Italia
 from input_manager import InputManager
@@ -43,6 +44,7 @@ class Game:
         tree_sprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
         grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
 
+        self.camera = Camera()
         self.car = Ferrari458Italia()
         self.road = Road()
         self.obstacle_manager = ObstacleManager()
@@ -67,6 +69,8 @@ class Game:
                         self.go_to_main_menu()
             else:
                 self.input_manager.handle_event(event)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                    self.camera.switch_mode(self.car)  # Переключення режиму камери
 
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
@@ -91,13 +95,15 @@ class Game:
         """
         delta_time = self.clock.get_time() / 1000
         self.input_manager.update_car(self.car)
-        self.car.update(self.road, delta_time)
+        self.car.update(self.road, delta_time, self.camera)
+        self.camera.update(self.car)
 
         if self.car.speed != 0:
             self.road.update(self.car.speed, delta_time)
-            self.parallax_manager.update(self.screen, self.car.speed, self.road)
+            self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera.camera_offset_x)
 
-            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
+            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed,
+                                            self.camera.camera_offset_x):
                 pygame.time.delay(100)
                 self.show_game_over_screen()
 
@@ -112,8 +118,8 @@ class Game:
         elif not self.paused:
             self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
-            self.road.render(self.screen)
-            self.obstacle_manager.render(self.screen, self.road)
+            self.road.render(self.screen, self.camera)
+            self.obstacle_manager.render(self.screen, self.road, self.camera.camera_offset_x)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:

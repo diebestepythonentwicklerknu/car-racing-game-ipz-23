@@ -31,7 +31,7 @@ class Tree:
     def height(self):
         return int(self.min_height + (self.max_height - self.min_height) * (1 - self.depth))
 
-    def update(self, car_speed, road):
+    def update(self, car_speed, road, camera_offset_x):
         """
         Update tree position and depth based on player speed and road curvature.
         """
@@ -42,7 +42,7 @@ class Tree:
             self.depth = 0
 
         # Adjust x position based on road curve and side
-        lane_edges, self.y = road.get_lane_positions(self.depth)
+        lane_edges, self.y = road.get_lane_positions(self.depth, camera_offset_x)
         if self.side == 'left':
             self.x = lane_edges[0] - self.offset  # Keep it to the left of the road
             self.current_sprite = self.sprites[0]

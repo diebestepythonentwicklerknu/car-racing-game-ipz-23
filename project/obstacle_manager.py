@@ -19,7 +19,7 @@ class ObstacleManager:
         self.near_obstacles = set()
         self.messages = []
 
-    def update(self, player, road, score_manager, car_speed):
+    def update(self, player, road, score_manager, car_speed, camera_offset_x):
         """
         Updates obstacle positions
         """
@@ -28,13 +28,13 @@ class ObstacleManager:
         for obstacle in self.obstacles:
             obstacle.update(car_speed)
 
-            if obstacle.get_reduced_rect(road).colliderect(player.get_rect()):
+            if obstacle.get_reduced_rect(road, camera_offset_x).colliderect(player.get_rect()):
                 collision_detected = True
 
             # If player goes over 100 kph and near obstacle + 100 to current score
             # Uses wider hitbox
             if obstacle not in self.near_obstacles:
-                if obstacle.get_increased_rect(road).colliderect(player.get_rect()) and car_speed > 100:
+                if obstacle.get_increased_rect(road, camera_offset_x).colliderect(player.get_rect()) and car_speed > 100:
                     self.near_obstacles.add(obstacle)
                     score_manager.add_score(100)
 
@@ -68,12 +68,12 @@ class ObstacleManager:
         return any(obstacle.get_rect(road).colliderect(player.get_rect()) for obstacle in
                    self.obstacles)  # FIX: a bit siplified visualy, but it works
 
-    def render(self, screen, road):
+    def render(self, screen, road, camera_offset_x):
         """
         Renders obstacles
         """
         for obstacle in sorted(self.obstacles, key=lambda x: x.depth, reverse=True):
-            obstacle.render(screen, road)
+            obstacle.render(screen, road, camera_offset_x)
 
         # Display messages about the bonus points
         current_time = time.time()
