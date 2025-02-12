@@ -21,9 +21,9 @@ def init_pygame_display(request):
 def obstacle_collision(self, depth):
     obstacle = Obstacle(1, depth)
     obstacleManager = ObstacleManager()
-    obstacleManager.obstacles.append(obstacle)
+    obstacleManager.__obstacles.append(obstacle)
     road = Road()
-    return obstacleManager.check_collision(self.car, road)
+    return obstacleManager._check_collision(self.car, road)
 
 class TestCar:
     def setup_method(self):
@@ -31,11 +31,11 @@ class TestCar:
 
     def test_move_right(self):
         self.car.move_right()
-        assert self.car.steering_angle > 0
+        assert self.car.__steering_angle > 0
         
     def test_move_left(self):
         self.car.move_left()
-        assert self.car.steering_angle < 0
+        assert self.car.__steering_angle < 0
 
     def test_move_forward(self):
         for i in range(10):
