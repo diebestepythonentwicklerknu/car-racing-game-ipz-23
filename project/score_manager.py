@@ -19,7 +19,7 @@ class ScoreManager:
         self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
         self.color = (255, 255, 255)
 
-        # Завантаження найкращого результату з файлу
+        
         self._load_best_score()
 
     def _load_best_score(self):
