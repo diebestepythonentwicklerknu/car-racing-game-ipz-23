@@ -50,7 +50,7 @@ class ParallaxManager:
         # Generate trees relative to the road's curvature
         depth = random.uniform(1.0, 1.2)
         lane_edges, y_position = road.get_lane_positions(depth, camera_offset_x)
-        offset = random.randint(10, 200)  # Fixed offset range
+        offset = random.randint(100, 300)  # Fixed offset range
 
         if side == 'left':
             if int(lane_edges[0]) - offset > 0:
@@ -78,20 +78,29 @@ class ParallaxManager:
             self.__left_offset = 0
             self.__right_offset = 0
         else:
+            
             max_left_offset = (road.calculate_control_points(road.next_turn)['left'][1][0] -
-                               road.calculate_control_points('straight')['left'][1][0]) * -1
+                               road.calculate_control_points('straight')['left'][1][0]) * 2
             max_right_offset = (road.calculate_control_points(road.next_turn)['right'][1][0] -
-                                road.calculate_control_points('straight')['right'][1][0]) * -1
-
-            if self.__left_offset > max_left_offset:
+                                road.calculate_control_points('straight')['right'][1][0]) * 2
+            
+            print(f'current: {road.current_turn}')
+            print(f'next: {road.next_turn}')
+            print(f'left offset: {max_left_offset}')
+            print(f'right offset: {max_right_offset}')
+            
+            if max_left_offset < self.__left_offset:
                 self.__left_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
-            elif self.__left_offset < max_left_offset:
-                self.__left_offset += constants.MOUNTAIN_PARALLAX_FACTOR
-
-            if self.__right_offset < max_right_offset:
+            elif max_left_offset > self.__left_offset:
+                if (self.__left_offset < 0):
+                    self.__left_offset += constants.MOUNTAIN_PARALLAX_FACTOR
+            
+            if max_right_offset < self.__right_offset:
+                if (self.__right_offset > 0):
+                    self.__right_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
+            elif max_right_offset > self.__right_offset:
                 self.__right_offset += constants.MOUNTAIN_PARALLAX_FACTOR
-            elif self.__right_offset > max_right_offset:
-                self.__right_offset -= constants.MOUNTAIN_PARALLAX_FACTOR
+
 
     def render(self, screen):
         """
