@@ -5,6 +5,7 @@ import pygame
 import constants
 from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
+from tutorial import Tutorial
 
 '''
 Menu class renders and handles the main menu
@@ -24,6 +25,7 @@ class Menu:
         self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
 
         button_position = (constants.SCREEN_WIDTH - constants.BUTTON_WIDTH) // 2
+        tutorial_position = (constants.SCREEN_WIDTH - constants.BUTTON_WIDTH) // 0.75
         self.__buttons = [{"text": "Play as Guest", "action": "guest",
                          "rect": pygame.Rect(button_position, 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
                         {"text": "Login", "action": "nickname",
@@ -31,11 +33,14 @@ class Menu:
                         {"text": "ScoreBoard", "action": "scoreboard",
                          "rect": pygame.Rect(button_position, 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
                         {"text": "Quit", "action": "quit",
-                         "rect": pygame.Rect(button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)}]
+                         "rect": pygame.Rect(button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                        {"text": "?", "action": "tutorial",
+                         "rect": pygame.Rect(tutorial_position, 20, constants.T_SQUARE_BUTTON_SIZE, constants.T_SQUARE_BUTTON_SIZE)}]
+
 
     def render(self):
         """
-        Renders a menu
+        Renders buttons
         """
         self.__screen.blit(self.__background, (0, 0))
 
@@ -72,6 +77,9 @@ class Menu:
                         exit()
                     elif button["action"] == "scoreboard":
                         self.show_scoreboard()
+                    elif button["action"] == "tutorial":
+                        tutorial = Tutorial(self.__screen)
+                        tutorial.show()
 
     def enter_nickname(self):
         """
@@ -138,6 +146,7 @@ class Menu:
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         return
+                    
 
     def run(self):
         """
@@ -152,3 +161,5 @@ class Menu:
 
             self.render()
             pygame.display.flip()
+    
+

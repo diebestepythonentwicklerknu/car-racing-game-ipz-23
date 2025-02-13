@@ -19,6 +19,7 @@ class ScoreManager:
         self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
         self.__color = (255, 255, 255)
 
+        
         self._load_best_score()
 
     def _load_best_score(self):
