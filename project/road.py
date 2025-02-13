@@ -1,21 +1,21 @@
 import random
 
 import pygame
-
+import constants
 
 class Road:
 
     def __init__(self):
-        self.segments = [{"curve": 0} for _ in range(5)]
-        self.offset = 0
-        self.turn_timer = 0  # Turn timer
-        self.road_color = (35, 20, 55)
-        self.lane_mark_color = (242, 102, 150)
-        self.horizon_y = 400  # Horizon line a bit below the center
-        self.transition_progress = 0.0
-        self.transition_duration = 5.0
-        self.turn_delay = 5.0
-        self.delay_timer = 0
+        self.__segments = [{"curve": 0} for _ in range(5)]
+        self.__offset = 0
+        self.__turn_timer = 0  # Turn timer
+        self.__road_color = (35, 20, 55)
+        self.__lane_mark_color = (242, 102, 150)
+        self.__horizon_y = constants.ROAD_HORIZON_Y  # Horizon line a bit below the center
+        self.__transition_progress = 0.0
+        self.__transition_duration = 5.0
+        self.__turn_delay = 5.0
+        self.__delay_timer = 0
         self.current_turn = "straight"
         self.next_turn = "straight"
 
@@ -33,36 +33,69 @@ class Road:
         """Розраховує точку на квадратичній кривій Безьє."""
         return ((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
                 (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
+    
+    
 
     @staticmethod
-    def calculate_control_points(turn_name):
+    def calculate_control_points(turn_name, camera_offset_x = 0):
         """
-        Returns the control points for the given type of turn.
+        Returns the control points for the given type of turn, adjusted for camera offset.
         """
+        def calculate_turn(k, y, start_point, phi=0, divider=100, angle=1.9):
+            return (phi * y**2)/divider + k * start_point - k * y * angle
+    
+        def get_curve_points(k, start_point, camera_offset_x = 0, phi=0, step=100):
+            points = []
+            
+            for y in range(0, constants.ROAD_HORIZON_Y + step, step):
+                points.append((calculate_turn(k, y, start_point + k * camera_offset_x / step, phi), constants.SCREEN_HEIGHT - y))
+            return points
+    
         control_points = {
-            "hard_left": {"left": [(0, 600), (300, 500), (0, 400)], "right": [(800, 600), (600, 400), (150, 400)], },
-            "long_left": {"left": [(0, 600), (300, 500), (220, 400)], "right": [(800, 600), (500, 400), (300, 400)], },
-            "long_right": {"left": [(0, 600), (300, 400), (500, 400)], "right": [(800, 600), (500, 500), (580, 400)], },
-            "hard_right": {"left": [(0, 600), (200, 400), (650, 400)], "right": [(800, 600), (500, 500), (800, 400)], },
-            "straight": {"left": [(0, 600), (187, 500), (375, 400)], "right": [(800, 600), (613, 500), (425, 400)], }, }
+            "hard_left": {
+                "left": get_curve_points(-1, 0, camera_offset_x, -0.5),
+                "right": get_curve_points(1, constants.SCREEN_WIDTH, camera_offset_x, -0.5),
+            },
+            "long_left": {
+                "left": get_curve_points(-1, 0, camera_offset_x, -0.2),
+                "right": get_curve_points(1, constants.SCREEN_WIDTH, camera_offset_x, -0.2),
+            },
+            "long_right": {
+                "left": get_curve_points(-1, 0, camera_offset_x, 0.2),
+                "right": get_curve_points(1, constants.SCREEN_WIDTH, camera_offset_x, 0.2),
+            },
+            "hard_right": {
+                "left": get_curve_points(-1, 0, camera_offset_x, 0.5),
+                "right": get_curve_points(1, constants.SCREEN_WIDTH, camera_offset_x, 0.5),
+            },
+            "straight": {
+                "left": get_curve_points(-1, 0, camera_offset_x),
+                "right": get_curve_points(1, constants.SCREEN_WIDTH, camera_offset_x),
+            },
+        }
+
         return control_points.get(turn_name, control_points["straight"])
 
-    def get_lane_positions(self, depth):
+    def get_lane_positions(self, depth, camera_offset_x):
         """
-        Calculates lane boundaries for a given depth.
+        Calculates lane boundaries for a given depth, adjusted for camera offset.
         """
-        current_control = self.calculate_control_points(self.current_turn)
-        next_control = self.calculate_control_points(self.next_turn)
+        current_control = self.calculate_control_points(self.current_turn, camera_offset_x)
+        next_control = self.calculate_control_points(self.next_turn, camera_offset_x)
 
         # Interpolate control points between current and next turn
         interpolated_left = [
-            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.transition_progress) for i
-            in range(3)]
+            self.interpolate_points(current_control["left"][i], next_control["left"][i], self.__transition_progress,
+                                    camera_offset_x)
+            for i in range(3)
+        ]
         interpolated_right = [
-            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.transition_progress) for
-            i in range(3)]
+            self.interpolate_points(current_control["right"][i], next_control["right"][i], self.__transition_progress,
+                                    camera_offset_x)
+            for i in range(3)
+        ]
 
-        # Calculate Bezier curve points for the given depth
+        # Calculate Bézier curve points for the given depth
         t = min(depth, 1)
         left_edge = self.bezier_point(t, *interpolated_left)
         right_edge = self.bezier_point(t, *interpolated_right)
@@ -77,38 +110,37 @@ class Road:
             lane_edges.append(lane_edges[-1] + road_width * (ratio / total_ratio))
 
         return lane_edges, left_edge[1]
-
     @staticmethod
-    def interpolate_points(p1, p2, t):
+    def interpolate_points(p1, p2, t, camera_offset_x):
         """
         Interpolates two points `p1` and `p2` by parameter `t`.
         """
-        return (1 - t) * p1[0] + t * p2[0], (1 - t) * p1[1] + t * p2[1],
+        return ((1 - t) * p1[0] + t * p2[0]) + camera_offset_x, ((1 - t) * p1[1] + t * p2[1]),
 
     def update(self, speed, delta_time):
-        self.offset += speed / 60
+        self.__offset += speed / 60
 
-        if self.transition_progress < 1.0:
-            self.transition_progress += delta_time / self.transition_duration
+        if self.__transition_progress < 1.0:
+            self.__transition_progress += delta_time / self.__transition_duration
         else:
-            self.delay_timer += delta_time
-            if self.delay_timer >= self.turn_delay:
+            self.__delay_timer += delta_time
+            if self.__delay_timer >= self.__turn_delay:
                 self.current_turn = self.next_turn
                 self.next_turn = self.generate_turn()
-                self.transition_progress = 0.0
-                self.delay_timer = 0.0
+                self.__transition_progress = 0.0
+                self.__delay_timer = 0.0
 
-        if self.offset >= len(self.segments):
-            self.offset -= len(self.segments)
-            self.segments.append(self.segments.pop(0))  # Rotate segments
+        if self.__offset >= len(self.__segments):
+            self.__offset -= len(self.__segments)
+            self.__segments.append(self.__segments.pop(0))  # Rotate segments
 
-    def render(self, screen):
+    def render(self, screen, camera):
         """
         Draws the road with curved edges using Bezier curves and adds solid lines.
         """
         # Extract control points for the current and next turns
-        current_controls = self.calculate_control_points(self.current_turn)
-        next_controls = self.calculate_control_points(self.next_turn)
+        current_controls = self.calculate_control_points(self.current_turn, camera.camera_offset_x)
+        next_controls = self.calculate_control_points(self.next_turn, camera.camera_offset_x)
 
         # Extract left and right control points from the dictionaries
         current_left, current_right = current_controls["left"], current_controls["right"]
@@ -116,9 +148,13 @@ class Road:
 
         # Interpolate control points between current and next turn
         interpolated_left = [
-            self.interpolate_points(current_left[i], next_left[i], self.transition_progress) for i in range(3)]
+            self.interpolate_points(current_left[i], next_left[i], self.__transition_progress, camera.camera_offset_x)
+            for i in range(3)
+        ]
         interpolated_right = [
-            self.interpolate_points(current_right[i], next_right[i], self.transition_progress) for i in range(3)]
+            self.interpolate_points(current_right[i], next_right[i], self.__transition_progress, camera.camera_offset_x)
+            for i in range(3)
+        ]
 
         # Calculate Bezier curve points for the left and right edges
         num_segments = 50  # Number of segments to draw the road
@@ -135,7 +171,7 @@ class Road:
                                range(len(left_curve))]
 
         for i in range(num_segments):
-            pygame.draw.polygon(screen, self.road_color, [left_curve[i],
+            pygame.draw.polygon(screen, self.__road_color, [left_curve[i],
                                                           left_curve[i + 1],
                                                           right_curve[i + 1],
                                                           right_curve[i],
@@ -143,5 +179,51 @@ class Road:
 
         # Draw dividing lines for lanes
         for i in range(num_segments):
-            pygame.draw.line(screen, self.lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
-            pygame.draw.line(screen, self.lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
+            pygame.draw.line(screen, self.__lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
+            pygame.draw.line(screen, self.__lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
+
+
+# BACK UP
+
+        # control_points = {
+        #     "hard_left": {
+        #         "left": [(0 + camera_offset_x * 0.175, 600),
+        #                  (((0 + camera_offset_x * 0.175) + (0 - camera_offset_x * 0.75)) + 300, 500), # 300
+        #                  (0 - camera_offset_x * 0.75, 400)],
+        #         "right": [(800 + camera_offset_x * 0.175, 600),
+        #                   (((800 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.75))*60/95, 400), # 600
+        #                   (150 - camera_offset_x * 0.75, 400)],
+        #     },
+        #     "long_left": {
+        #         "left": [(-50 + camera_offset_x * 0.125, 600),
+        #                  (((50 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.5)) * 1.5, 500), # 300
+        #                  (220 - camera_offset_x * 0.65, 400)],
+        #         "right": [(800 + camera_offset_x * 0.125, 600),
+        #                   (500 - camera_offset_x * 0.462, 400), # 500
+        #                   (300 - camera_offset_x * 0.65, 400)],
+        #     },
+        #     "long_right": {
+        #         "left": [(0 + camera_offset_x * 0.175, 600),
+        #                  (((0 + camera_offset_x * 0.175) + (500 - camera_offset_x * 0.75)) * 3/5, 400), # 300
+        #                  (480 - camera_offset_x * 0.65, 400)],
+        #         "right": [(800 + camera_offset_x * 0.125, 600),
+        #                   (((800 + camera_offset_x * 0.175) + (610 - camera_offset_x * 1.5)) * 50/125, 500), # 500
+        #                   (610 - camera_offset_x * 0.65, 400)],
+        #     },
+        #     "hard_right": {
+        #         "left": [(0 + camera_offset_x * 0.175, 600),
+        #                  (((0 + camera_offset_x * 0.175) + (650 - camera_offset_x * 0.75))*4/13, 400), # 200
+        #                  (650 - camera_offset_x * 0.7, 400)],
+        #         "right": [(800 + camera_offset_x * 0.175, 600),
+        #                   (((800 + camera_offset_x * 0.175) + (800 - camera_offset_x * 1.5)) / 3, 500), # 500
+        #                   (800 - camera_offset_x * 0.7, 400)],
+        #     },
+        #     "straight": {
+        #         "left": [(0 + camera_offset_x * 0.175, 600),
+        #                  (((0 + camera_offset_x * 0.175) + (375 - camera_offset_x * 0.75)) / 2, 500),
+        #                  (375 - camera_offset_x * 0.75, 400)],
+        #         "right": [(800 + camera_offset_x * 0.175, 600),
+        #                   (((800 + camera_offset_x * 0.175) + (425 - camera_offset_x * 0.75)) / 2, 500),
+        #                   (425 - camera_offset_x * 0.75, 400)],
+        #     },
+        # }

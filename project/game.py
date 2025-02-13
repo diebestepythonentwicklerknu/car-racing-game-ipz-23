@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+from camera import Camera
 import constants
 from car import Ferrari458Italia
 from input_manager import InputManager
@@ -26,8 +27,8 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
         pygame.display.set_caption("Racing")
-        self.clock = pygame.time.Clock()
-        self.running = True
+        self.__clock = pygame.time.Clock()
+        self.__running = True
         self.paused = False
         self.game_over = False
         self.nickname = nickname
@@ -43,6 +44,7 @@ class Game:
         tree_sprites = SpriteManager.get_frame_sequence('tree-Sheet.png', 64, 96, 2)
         grass_sprites = SpriteManager.get_frame_sequence('grass-Sheet.png', 300, 200, 3)
 
+        self.camera = Camera()
         self.car = Ferrari458Italia()
         self.road = Road()
         self.obstacle_manager = ObstacleManager()
@@ -58,7 +60,7 @@ class Game:
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                self.__running = False
             elif self.game_over:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
@@ -67,6 +69,8 @@ class Game:
                         self.go_to_main_menu()
             else:
                 self.input_manager.handle_event(event)
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+                    self.camera.switch_mode(self.car)  # Переключення режиму камери
 
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
@@ -89,15 +93,17 @@ class Game:
         """
         Updates the game elements states
         """
-        delta_time = self.clock.get_time() / 1000
+        delta_time = self.__clock.get_time() / 1000
         self.input_manager.update_car(self.car)
-        self.car.update(self.road, delta_time)
+        self.car.update(self.road, delta_time, self.camera)
+        self.camera.update(self.car)
 
         if self.car.speed != 0:
             self.road.update(self.car.speed, delta_time)
-            self.parallax_manager.update(self.screen, self.car.speed, self.road)
+            self.parallax_manager.update(self.screen, self.car.speed, self.road, self.camera.camera_offset_x)
 
-            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed):
+            if self.obstacle_manager.update(self.car, self.road, self.score_manager, self.car.speed,
+                                            self.camera.camera_offset_x):
                 pygame.time.delay(100)
                 self.show_game_over_screen()
 
@@ -112,8 +118,8 @@ class Game:
         elif not self.paused:
             self.screen.fill((100, 200, 255))
             self.parallax_manager.render(self.screen)
-            self.road.render(self.screen)
-            self.obstacle_manager.render(self.screen, self.road)
+            self.road.render(self.screen, self.camera)
+            self.obstacle_manager.render(self.screen, self.road, self.camera.camera_offset_x)
             self.car.render(self.screen)
             self.score_manager.render(self.screen)
         else:
@@ -127,12 +133,12 @@ class Game:
         Runs the game
         Main game loop
         """
-        while self.running:
+        while self.__running:
             self.handle_events()
             self.update()
             self.render()
             pygame.display.flip()
-            self.clock.tick(constants.FPS)
+            self.__clock.tick(constants.FPS)
 
         if self.nickname:
             self.scoreboard.update_score(self.nickname, int(self.score_manager.score))

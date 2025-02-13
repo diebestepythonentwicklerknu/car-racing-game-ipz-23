@@ -13,42 +13,41 @@ class Obstacle:
         """
         Initializes the obstacle components
         """
-        self.lane = lane
+        self.__lane = lane
         self.depth = depth  # Horizon
-        self.color = (0, 255, 0)
-        self.speed_factor = 0.006
-        self.sprite = SpriteManager.load_image('obstacle.png')
+        self.__speed_factor = 0.006
+        self.__sprite = SpriteManager.load_image('obstacle.png')
 
     def update(self, car_speed):
         """
         Updates the obstacle position based on the car depth and speed
         """
-        self.depth -= self.speed_factor * (car_speed / 100)  # The closer to the player the bigger the size
+        self.depth -= self.__speed_factor * (car_speed / 100)  # The closer to the player the bigger the size
 
-    def compute_rect(self, road, scale_factor=1.0):
-        lane_edges, y = road.get_lane_positions(self.depth)
-        width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8 * scale_factor, 15)
+    def __compute_rect(self, road, scale_factor=1.0, camera_offset_x=0):
+        lane_edges, y = road.get_lane_positions(self.depth, camera_offset_x)
+        width = max((lane_edges[self.__lane + 1] - lane_edges[self.__lane]) * 0.8 * scale_factor, 15)
         height = width // OBSTACLE_RATIO
-        x = (lane_edges[self.lane] + lane_edges[self.lane + 1]) // 2
+        x = (lane_edges[self.__lane] + lane_edges[self.__lane + 1]) // 2
 
         return pygame.Rect(x - width // 2, y - height, width, height)
 
-    def get_rect(self, road):
-        return self.compute_rect(road)
+    def get_rect(self, road, camera_offset_x):
+        return self.__compute_rect(road, camera_offset_x=camera_offset_x)
 
-    def get_reduced_rect(self, road):
-        return self.compute_rect(road, scale_factor=0.8)
+    def get_reduced_rect(self, road, camera_offset_x):
+        return self.__compute_rect(road, scale_factor=0.8, camera_offset_x=camera_offset_x)
 
-    def get_increased_rect(self, road):
-        return self.compute_rect(road, scale_factor=1.4)  # Fix: made a  size of the bigger hitbox a lil bit smaller
+    def get_increased_rect(self, road, camera_offset_x):
+        return self.__compute_rect(road, scale_factor=1.4, camera_offset_x=camera_offset_x)  # Fix: made a  size of the bigger hitbox a lil bit smaller
 
-    def render(self, screen, road):
+    def render(self, screen, road, camera_offset_x):
         """
         Renders obstalces on the screen
         """
 
-        rect = self.get_rect(road)
-        scaled_image = pygame.transform.scale(self.sprite, (rect.width, rect.height))
+        rect = self.get_rect(road, camera_offset_x)
+        scaled_image = pygame.transform.scale(self.__sprite, (rect.width, rect.height))
         screen.blit(scaled_image, rect)
 
         # Uncomment to test the hitbox

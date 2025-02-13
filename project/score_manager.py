@@ -16,8 +16,8 @@ class ScoreManager:
         """
         self.score = 0.0
         self.best_score = 0
-        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
-        self.color = (255, 255, 255)
+        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
+        self.__color = (255, 255, 255)
 
         
         self._load_best_score()
@@ -71,7 +71,7 @@ class ScoreManager:
         """
         Render the current score and the best score on the screen.
         """
-        score_text = self.font.render(f"Score: {int(self.score)}", True, self.color)
-        best_score_text = self.font.render(f"Best Score: {self.best_score}", True, self.color)
+        score_text = self.__font.render(f"Score: {int(self.score)}", True, self.__color)
+        best_score_text = self.__font.render(f"Best Score: {self.best_score}", True, self.__color)
         screen.blit(score_text, (10, 10))  # Current score
         screen.blit(best_score_text, (10, 50))  # Best score

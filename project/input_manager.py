@@ -11,38 +11,39 @@ class InputManager:
         """
         Initializes the input manager components
         """
-        self.actions = {pygame.K_LEFT: 'left',
+        self.__actions = {pygame.K_LEFT: 'left',
                         pygame.K_RIGHT: 'right',
                         pygame.K_UP: 'accelerate',
                         pygame.K_DOWN: 'brake', }
-        self.pressed_keys = set()
-        self.unpressed_keys = set()
-        self.pause_key_pressed: bool = False
-        self.pause_key_handled: bool = False  # Space key
+        self.__pressed_keys = set()
+        self.__unpressed_keys = set()
+        self.__pause_key_pressed: bool = False
+        self.__pause_key_handled: bool = False  # Space key
 
     def handle_event(self, event):
         """
         Handles key events
         """
         if event.type == pygame.KEYDOWN:
-            self.pressed_keys.add(event.key)
+            self.__pressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
-                self.pause_key_pressed = True
+                self.__pause_key_pressed = True
         elif event.type == pygame.KEYUP:
-            self.pressed_keys.discard(event.key)
-            self.unpressed_keys.add(event.key)
+            self.__pressed_keys.discard(event.key)
+            self.__unpressed_keys.add(event.key)
             if event.key == pygame.K_SPACE:
-                self.pause_key_pressed = False
-                self.pause_key_handled = False
+                self.__pause_key_pressed = False
+                self.__pause_key_handled = False
 
     def is_pause_pressed(self):
         """
         Checks if the Pause button is pressed. Returns TRUE only once
         """
-        if self.pause_key_pressed and not self.pause_key_handled:
-            self.pause_key_handled = True  # Space is pressed
+        if self.__pause_key_pressed and not self.__pause_key_handled:
+            self.__pause_key_handled = True  # Space is pressed
             return True
         return False
+
 
     @staticmethod
     def handle_pause(func):
@@ -60,17 +61,17 @@ class InputManager:
     @handle_pause
     def update_car(self, car):
         """ Оновлює стан автомобіля на основі введених даних """
-        car.isTurningLeft = pygame.K_LEFT in self.pressed_keys
-        car.isTurningRight = pygame.K_RIGHT in self.pressed_keys
-        car.isStopping = pygame.K_DOWN in self.pressed_keys
+        car.is_turning_left = pygame.K_LEFT in self.__pressed_keys
+        car.is_turning_right = pygame.K_RIGHT in self.__pressed_keys
+        car.is_stopping = pygame.K_DOWN in self.__pressed_keys
 
-        if car.isTurningLeft:
+        if car.is_turning_left:
             car.move_left()
-        if car.isTurningRight:
+        if car.is_turning_right:
             car.move_right()
-        if pygame.K_UP in self.pressed_keys:
+        if pygame.K_UP in self.__pressed_keys:
             car.increase_throttle()
-        elif car.isStopping:
+        elif car.is_stopping:
             car.decrease_throttle()
         else:
             car.decrease_speed(constants.CAR_INERTIA_FACTOR)
