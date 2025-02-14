@@ -28,8 +28,8 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT))
         pygame.display.set_caption("Racing")
-        self.clock = pygame.time.Clock()
-        self.running = True
+        self.__clock = pygame.time.Clock()
+        self.__running = True
         self.paused = False
         self.game_over = False
         self.nickname = nickname
@@ -61,7 +61,7 @@ class Game:
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                self.running = False
+                self.__running = False
             elif self.game_over:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r:
@@ -94,7 +94,7 @@ class Game:
         """
         Updates the game elements states
         """
-        delta_time = self.clock.get_time() / 1000
+        delta_time = self.__clock.get_time() / 1000
         self.input_manager.update_car(self.car)
         self.car.update(self.road, delta_time, self.camera)
         self.camera.update(self.car)
@@ -134,12 +134,12 @@ class Game:
         Runs the game
         Main game loop
         """
-        while self.running:
+        while self.__running:
             self.handle_events()
             self.update()
             self.render()
             pygame.display.flip()
-            self.clock.tick(constants.FPS)
+            self.__clock.tick(constants.FPS)
 
         if self.nickname:
             self.scoreboard.update_score(self.nickname, int(self.score_manager.score))

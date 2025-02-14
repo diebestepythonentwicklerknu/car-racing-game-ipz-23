@@ -14,17 +14,16 @@ class Car:
     """
 
     def __init__(self, sprites, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
-        self.isTurningLeft: bool = False
-        self.isTurningRight: bool = False
-        self.isStopping: bool = False
+        self.is_turning_left: bool = False
+        self.is_turning_right: bool = False
+        self.is_stopping: bool = False
 
         self.x: int = constants.CAR_POSITION[0]
         self.y: int = constants.CAR_POSITION[1]
-        self.road_offset_x = 0
-        self.width: int = constants.CAR_SIZE[0]
-        self.height: int = constants.CAR_SIZE[1]
-        self.current_sprite_frame: int = 0
-        self.sprites = sprites
+        self.__width: int = constants.CAR_SIZE[0]
+        self.__height: int = constants.CAR_SIZE[1]
+        self.__current_sprite_frame: int = 0
+        self.__sprites = sprites
         self.speed: int = 0
         self.throttle: int = 0
         self.min_speed: int = 0
@@ -32,25 +31,26 @@ class Car:
         self.target_x: int = self.x  # Car's start position
         self.max_offset: int = 245
         self.road_center: int = constants.CAR_POSITION[0]
-        self.font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
+        self.road_offset_x: int = 0
+        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
         self.camera = Camera()
 
         # Car characteristics
-        self.mass: int = mass  # In kg
-        self.max_power: int = max_power  # In watts
-        self.drag_coefficient: float = drag_coefficient
-        self.frontal_area: int = frontal_area  # In m²
-        self.air_density: float = 1.225  # In kg/m³
-        self.wheelbase: int = wheelbase  # In meters
-        self.steering_angle: int = 0  # In degrees
+        self.__mass: int = mass  # In kg
+        self.__max_power: int = max_power  # In watts
+        self.__drag_coefficient: float = drag_coefficient
+        self.__frontal_area: int = frontal_area  # In m²
+        self.__air_density: float = 1.225  # In kg/m³
+        self.__wheelbase: int = wheelbase  # In meters
+        self.__steering_angle: int = 0  # In degrees
 
-    def get_steering_factor(self) -> float:
+    def __get_steering_factor(self) -> float:
         """
         Defines the speed of steering based on car's speed
         """
         return max(1.5, 2 - abs(self.speed - 200) / 150)  # Max sensitivity at 200 km/h
 
-    def get_max_steering_angle(self) -> int:
+    def __get_max_steering_angle(self) -> int:
         """
         Limits the steering max angle based on the current speed
         """
@@ -59,37 +59,37 @@ class Car:
     # @staticmethod
     def with_steering_params(func):
         def wrapper(self):
-            steering_factor = self.get_steering_factor()
-            max_angle = self.get_max_steering_angle()
+            steering_factor = self.__get_steering_factor()
+            max_angle = self.__get_max_steering_angle()
             return func(self, steering_factor, max_angle)
 
         return wrapper
 
     @with_steering_params
     def move_left(self, steering_factor, max_angle):
-        self.steering_angle = max(self.steering_angle - steering_factor, -max_angle)
+        self.__steering_angle = max(self.__steering_angle - steering_factor, -max_angle)
 
     @with_steering_params
     def move_right(self, steering_factor, max_angle):
-        self.steering_angle = min(self.steering_angle + steering_factor, max_angle)
+        self.__steering_angle = min(self.__steering_angle + steering_factor, max_angle)
 
-    def reset_steering(self):
+    def _reset_steering(self):
         """
         Turns the steering to its original place if no key is pressed
         """
-        if self.steering_angle > 0:
-            self.steering_angle = max(self.steering_angle - 0.81, 0)
-        elif self.steering_angle < 0:
-            self.steering_angle = min(self.steering_angle + 0.81, 0)
+        if self.__steering_angle > 0:
+            self.__steering_angle = max(self.__steering_angle - 0.81, 0)
+        elif self.__steering_angle < 0:
+            self.__steering_angle = min(self.__steering_angle + 0.81, 0)
 
-    def update_steering(self):
+    def _update_steering(self):
         """
         Adds a momentum to cars movement
         """
-        if self.steering_angle > 0:
-            self.steering_angle = max(self.steering_angle - 0.1, 0)
-        elif self.steering_angle < 0:
-            self.steering_angle = min(self.steering_angle + 0.1, 0)
+        if self.__steering_angle > 0:
+            self.__steering_angle = max(self.__steering_angle - 0.1, 0)
+        elif self.__steering_angle < 0:
+            self.__steering_angle = min(self.__steering_angle + 0.1, 0)
 
     def update(self, road, delta_time, camera):
         """
@@ -98,59 +98,59 @@ class Car:
         self._update_speed()
         self._update_position(camera)
         self.apply_road_force(road, delta_time)
-        self.reset_steering()
+        self._reset_steering()
 
     def render(self, screen):
         """
         Renders car
         """
-        speed_text = self.font.render(f"Speed: {self.speed:.0f} km/h", True, (255, 255, 255))
+        speed_text = self.__font.render(f"Speed: {self.speed:.0f} km/h", True, (255, 255, 255))
 
-        self.update_car_sprite()
-        screen.blit(self.sprites[int(self.current_sprite_frame // constants.FRAME_FACTOR)],
-                    (self.x - self.width, self.y, self.width, self.height))
+        self._update_car_sprite()
+        screen.blit(self.__sprites[int(self.__current_sprite_frame // constants.FRAME_FACTOR)],
+                    (self.x - self.__width, self.y, self.__width, self.__height))
         screen.blit(speed_text, (10, 580))
 
         # Uncomment to draw car hitbox
         # pygame.draw.rect(screen, (0, 0, 0),
         # (self.x - self.width // 2, self.y + self.height // 2, self.width, self.height), 1)
 
-    def update_car_sprite(self):
+    def _update_car_sprite(self):
         """
         Updates car sprites based on the current state
         """
 
-        if self.isTurningLeft:
-            self._animate_turn_left()
-        elif self.isTurningRight:
-            self._animate_turn_right()
-        elif self.isStopping:
-            self._animate_stop()
+        if self.is_turning_left:
+            self.__animate_turn_left()
+        elif self.is_turning_right:
+            self.__animate_turn_right()
+        elif self.is_stopping:
+            self.__animate_stop()
         elif self.speed > 0:
-            self._animate_move()
+            self.__animate_move()
         else:
-            self.current_sprite_frame = 0
+            self.__current_sprite_frame = 0
 
         if self.speed > 100:
-            self.current_sprite_frame += constants.FRAME_STEP
+            self.__current_sprite_frame += constants.FRAME_STEP
         elif self.speed > 0:
-            self.current_sprite_frame += constants.FRAME_STEP_SLOW
+            self.__current_sprite_frame += constants.FRAME_STEP_SLOW
 
-    def _animate_turn_left(self):
-        if self.current_sprite_frame + 1 >= 50 or self.current_sprite_frame < 35:
-            self.current_sprite_frame = 35
+    def __animate_turn_left(self):
+        if self.__current_sprite_frame + 1 >= 50 or self.__current_sprite_frame < 35:
+            self.__current_sprite_frame = 35
 
-    def _animate_turn_right(self):
-        if self.current_sprite_frame + 1 >= 35 or self.current_sprite_frame < 20:
-            self.current_sprite_frame = 20
+    def __animate_turn_right(self):
+        if self.__current_sprite_frame + 1 >= 35 or self.__current_sprite_frame < 20:
+            self.__current_sprite_frame = 20
 
-    def _animate_move(self):
-        if self.current_sprite_frame + 1 >= 70 or self.current_sprite_frame < 55:
-            self.current_sprite_frame = 55
+    def __animate_move(self):
+        if self.__current_sprite_frame + 1 >= 70 or self.__current_sprite_frame < 55:
+            self.__current_sprite_frame = 55
 
-    def _animate_stop(self):
-        if self.current_sprite_frame + 1 >= 20:
-            self.current_sprite_frame = 0
+    def __animate_stop(self):
+        if self.__current_sprite_frame + 1 >= 20:
+            self.__current_sprite_frame = 0
 
     def increase_throttle(self):
         """
@@ -184,7 +184,7 @@ class Car:
         """
         Returns car's hitbox
         """
-        return pygame.Rect(self.x - self.width // 2, self.y + self.height // 2, self.width, self.height)
+        return pygame.Rect(self.x - self.__width // 2, self.y + self.__height // 2, self.__width, self.__height)
 
     def apply_road_force(self, road, delta_time):
         """
@@ -218,17 +218,17 @@ class Car:
         """
         if self.speed > 0 or self.throttle > 0:
             # Drag force calculation based on diffrerent factors
-            drag_force = 0.5 * self.drag_coefficient * self.air_density * self.frontal_area * (self.speed / 3.6) ** 2
+            drag_force = 0.5 * self.__drag_coefficient * self.__air_density * self.__frontal_area * (self.speed / 3.6) ** 2
 
             # Limit the drag force to the car's power
-            max_force = ((self.max_power * self.throttle)
-                         / max(self.speed / 3.6, 1e-6)) if self.speed > 0 else self.max_power * self.throttle
+            max_force = ((self.__max_power * self.throttle)
+                         / max(self.speed / 3.6, 1e-6)) if self.speed > 0 else self.__max_power * self.throttle
 
             # Net force calculation
             net_force = max(0, int(max_force - drag_force))
 
             # Acceleration calculation
-            acceleration = net_force / self.mass
+            acceleration = net_force / self.__mass
 
             # Speed update
             self.speed += acceleration * (1 / 60) * 3.6
@@ -244,11 +244,11 @@ class Car:
         """
         Updates car's position based on turn's type
         """
-        if abs(self.steering_angle) > 0:
-            radius = self.wheelbase / math.tan(math.radians(self.steering_angle))
+        if abs(self.__steering_angle) > 0:
+            radius = self.__wheelbase / math.tan(math.radians(self.__steering_angle))
             angular_velocity = (self.speed / 3.6) / radius  # Radians per second
-            self.x += angular_velocity * radius * math.sin(math.radians(self.steering_angle))
-            self.road_offset_x -= (angular_velocity * radius * math.sin(math.radians(self.steering_angle)))
+            self.x += angular_velocity * radius * math.sin(math.radians(self.__steering_angle))
+            self.road_offset_x -= (angular_velocity * radius * math.sin(math.radians(self.__steering_angle)))
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
         self.road_offset_x = min(-(self.road_center - self.max_offset), max(self.road_offset_x, -(self.road_center + self.max_offset)))
