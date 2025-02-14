@@ -56,7 +56,7 @@ class Car:
         """
         return max(10, int(20 - (self.speed / 60)))  # Max angle at 300 km/h = 10°
 
-    @staticmethod
+    # @staticmethod
     def with_steering_params(func):
         def wrapper(self):
             steering_factor = self.__get_steering_factor()
