@@ -13,6 +13,7 @@ from road import Road
 from score_manager import ScoreManager
 from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
+from pygame import mixer
 
 
 class Game:
@@ -75,7 +76,7 @@ class Game:
         if not self.game_over and self.input_manager.is_pause_pressed():
             self.paused = not self.paused
 
-    @staticmethod
+    # @staticmethod
     def game_state_guard(func):
         """
         Decorator to prevent updating the game state when the game is over or paused.

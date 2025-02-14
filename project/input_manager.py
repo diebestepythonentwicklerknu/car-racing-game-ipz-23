@@ -45,7 +45,7 @@ class InputManager:
         return False
 
 
-    @staticmethod
+    # @staticmethod
     def handle_pause(func):
         """
         Decorator to pause the game

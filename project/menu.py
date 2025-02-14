@@ -1,7 +1,5 @@
 import os
-
 import pygame
-
 import constants
 from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
@@ -25,13 +23,18 @@ class Menu:
 
         button_position = (constants.SCREEN_WIDTH - constants.BUTTON_WIDTH) // 2
         self.buttons = [{"text": "Play as Guest", "action": "guest",
-                         "rect": pygame.Rect(button_position, 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                         "rect": pygame.Rect(button_position, 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)} ,
                         {"text": "Login", "action": "nickname",
-                         "rect": pygame.Rect(button_position, 360, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                         "rect": pygame.Rect(button_position, 360, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)} ,
                         {"text": "ScoreBoard", "action": "scoreboard",
-                         "rect": pygame.Rect(button_position, 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                         "rect": pygame.Rect(button_position, 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)} ,
                         {"text": "Quit", "action": "quit",
                          "rect": pygame.Rect(button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)}]
+
+        # constants for music (probably should be in different place)
+        self.volume = 0.05
+        self.slider_rect = pygame.Rect(60, constants.SCREEN_HEIGHT - 48, 100, 6)
+        self.slider_handle_radius = 8
 
     def render(self):
         """
@@ -53,6 +56,17 @@ class Menu:
             text_y = button["rect"].y + (button["rect"].height - text.get_height()) // 2
             self.screen.blit(text, (text_x, text_y))
 
+        # Draw sound icon
+        self.sound_icon = pygame.image.load(os.path.join("assets", "sprites", "sound_icon.png"))
+        self.sound_icon = pygame.transform.scale(self.sound_icon, (30, 30))
+        self.screen.blit(self.sound_icon, (self.slider_rect.x - 45, self.slider_rect.y - 13))
+
+        # Draw sound slider (primitive one)
+        slider_handle_x = self.slider_rect.x + self.volume * self.slider_rect.width
+        slider_handle_y = self.slider_rect.y + self.slider_rect.height // 2
+        pygame.draw.rect(self.screen, (200, 200, 200), self.slider_rect)
+        pygame.draw.circle(self.screen, (202, 62, 110), (slider_handle_x, slider_handle_y), self.slider_handle_radius)
+
     def handle_event(self, event):
         """
         Handles menu key pressing
@@ -72,6 +86,18 @@ class Menu:
                         exit()
                     elif button["action"] == "scoreboard":
                         self.show_scoreboard()
+            # Перевіряємо, чи натиснуто на повзунок для зміни гучності
+            if self.slider_rect.collidepoint(event.pos):
+                self.volume = (event.pos[0] - self.slider_rect.x) / self.slider_rect.width  # Обчислюємо нову гучність
+                self.volume = max(0.0, min(self.volume, 1.0))  # Переконуємося, що гучність в межах 0-1
+                pygame.mixer.music.set_volume(self.volume)  # Змінюємо гучність
+
+        elif event.type == pygame.MOUSEMOTION:
+            if event.buttons[0] == 1:  # Якщо натиснута ліва кнопка миші
+                if self.slider_rect.collidepoint(event.pos):  # Якщо мишка над повзунком
+                    self.volume = (event.pos[0] - self.slider_rect.x) / self.slider_rect.width
+                    self.volume = max(0.0, min(self.volume, 1.0))  # Обмежуємо гучність від 0 до 1
+                    pygame.mixer.music.set_volume(self.volume)  # Змінюємо гучність
 
     def enter_nickname(self):
         """

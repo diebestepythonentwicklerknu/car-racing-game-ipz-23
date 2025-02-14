@@ -25,7 +25,7 @@ class Obstacle:
         """
         self.depth -= self.speed_factor * (car_speed / 100)  # The closer to the player the bigger the size
 
-    def compute_rect(self, road, scale_factor=1.0, camera_offset_x):
+    def compute_rect(self, road, camera_offset_x, scale_factor=1.0):
         lane_edges, y = road.get_lane_positions(self.depth, camera_offset_x)
         width = max((lane_edges[self.lane + 1] - lane_edges[self.lane]) * 0.8 * scale_factor, 15)
         height = width // OBSTACLE_RATIO
@@ -72,10 +72,10 @@ class Obstacle:
         return self.compute_rect(road, camera_offset_x=camera_offset_x)
 
     def get_reduced_rect(self, road, camera_offset_x):
-        return self.compute_rect(road, scale_factor=0.8, camera_offset_x)
+        return self.compute_rect(road, camera_offset_x, scale_factor=0.8)
 
     def get_increased_rect(self, road, camera_offset_x):
-        return self.compute_rect(road, scale_factor=1.4, camera_offset_x)  # Fix: made a  size of the bigger hitbox a lil bit smaller
+        return self.compute_rect(road, camera_offset_x, scale_factor=1.4)  # Fix: made a  size of the bigger hitbox a lil bit smaller
 #>>>>>>> new-merge-branch
 
     def render(self, screen, road, camera_offset_x):
