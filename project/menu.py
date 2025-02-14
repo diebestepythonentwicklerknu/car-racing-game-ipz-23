@@ -1,3 +1,4 @@
+import sys
 import os
 import pygame
 import constants
@@ -64,13 +65,13 @@ class Menu:
         # Draw sound icon
         self.sound_icon = pygame.image.load(os.path.join("assets", "sprites", "sound_icon.png"))
         self.sound_icon = pygame.transform.scale(self.sound_icon, (30, 30))
-        self.screen.blit(self.sound_icon, (self.slider_rect.x - 45, self.slider_rect.y - 13))
+        self.__screen.blit(self.sound_icon, (self.slider_rect.x - 45, self.slider_rect.y - 13))
 
         # Draw sound slider (primitive one)
         slider_handle_x = self.slider_rect.x + self.volume * self.slider_rect.width
         slider_handle_y = self.slider_rect.y + self.slider_rect.height // 2
-        pygame.draw.rect(self.screen, (200, 200, 200), self.slider_rect)
-        pygame.draw.circle(self.screen, (202, 62, 110), (slider_handle_x, slider_handle_y), self.slider_handle_radius)
+        pygame.draw.rect(self.__screen, (200, 200, 200), self.slider_rect)
+        pygame.draw.circle(self.__screen, (202, 62, 110), (slider_handle_x, slider_handle_y), self.slider_handle_radius)
 
     def handle_event(self, event):
         """
@@ -78,7 +79,7 @@ class Menu:
         """
         if event.type == pygame.QUIT:
             pygame.quit()
-            exit()
+            sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             for button in self.__buttons:
                 if button["rect"].collidepoint(event.pos):
@@ -88,7 +89,7 @@ class Menu:
                         self.enter_nickname()
                     elif button["action"] == "quit":
                         pygame.quit()
-                        exit()
+                        sys.exit()
                     elif button["action"] == "scoreboard":
                         self.show_scoreboard()
                     elif button["action"] == "tutorial":
@@ -127,7 +128,7 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN and nickname.strip():
                         self.__running = False
@@ -168,7 +169,7 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         return
