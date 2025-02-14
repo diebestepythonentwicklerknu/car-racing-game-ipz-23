@@ -46,9 +46,8 @@ class Road:
     
         def get_curve_points(k, start_point, camera_offset_x = 0, phi=0, step=100):
             points = []
-            
             for y in range(0, constants.ROAD_HORIZON_Y + step, step):
-                points.append((calculate_turn(k, y, start_point + k * camera_offset_x / step, phi), constants.SCREEN_HEIGHT - y))
+                points.append((calculate_turn(k, y, start_point +  k * camera_offset_x / step, phi), constants.SCREEN_HEIGHT - y))
             return points
     
         control_points = {
