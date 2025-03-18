@@ -26,3 +26,7 @@ class Camera:
         else:
             car.x = -car.road_offset_x
             self.mode = "road"
+    
+        def get_position(self):
+            """Returns the current camera position."""
+            return self.camera_offset_x, 0
