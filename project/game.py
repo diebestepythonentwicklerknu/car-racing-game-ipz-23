@@ -1,5 +1,5 @@
 import os
-
+import sys
 import pygame
 
 from camera import Camera
@@ -15,12 +15,14 @@ from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
 from pygame import mixer
 
-
+print("PYTHONPATH:", sys.path)
+print("Current Directory:", os.getcwd())
+      
 class Game:
     """
     Game class is responsible for managing the game components
     """
-
+    
     def __init__(self, nickname=None):
         """
         Initializes the game

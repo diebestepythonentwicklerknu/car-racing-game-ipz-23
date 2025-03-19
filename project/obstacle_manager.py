@@ -61,11 +61,11 @@ class ObstacleManager:
 
         return collision_detected
 
-    def _check_collision(self, player, road):
+    def _check_collision(self, player, road, camera_offset_x):
         """
         Checks if objects collides with the player
         """
-        return any(obstacle.get_rect(road).colliderect(player.get_rect()) for obstacle in
+        return any(obstacle.get_rect(road, camera_offset_x).colliderect(player.get_rect()) for obstacle in
                    self.__obstacles)  # FIX: a bit siplified visualy, but it works
 
     def render(self, screen, road, camera_offset_x):

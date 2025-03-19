@@ -63,7 +63,7 @@ class Menu:
             self.__screen.blit(text, (text_x, text_y))
 
         # Draw sound icon
-        self.sound_icon = pygame.image.load(os.path.join("assets", "sprites", "sound_icon.png"))
+        self.sound_icon = pygame.image.load(os.path.join("project", "assets", "sprites", "sound_icon.png"))
         self.sound_icon = pygame.transform.scale(self.sound_icon, (30, 30))
         self.__screen.blit(self.sound_icon, (self.slider_rect.x - 45, self.slider_rect.y - 13))
 
