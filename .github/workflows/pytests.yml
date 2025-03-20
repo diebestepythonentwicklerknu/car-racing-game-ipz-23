@@ -34,4 +34,5 @@ jobs:
       - name: Run tests
         run: pytest test/car_test.py
         env:
+          PYTHONPATH: ${{ github.workspace }}
           DISPLAY: ":99.0"
