@@ -17,7 +17,8 @@ if __name__ == "__main__":
 
     # Background music
     mixer.init()
-    mixer.music.load(os.path.join("project","assets", "sounds", "background_music.wav"))
+
+    mixer.music.load(os.path.join("assets", "sounds", "background_music.wav"))
     mixer.music.set_volume(0.03)
     mixer.music.play(-1)
 

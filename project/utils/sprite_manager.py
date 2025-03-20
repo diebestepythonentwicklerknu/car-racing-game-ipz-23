@@ -1,5 +1,5 @@
 import os.path
-
+from project import constants
 import pygame
 
 '''
@@ -10,7 +10,7 @@ SpriteManager class is a utility class that helps to load and manage sprites
 class SpriteManager:
     @staticmethod
     def load_image(__filename__):
-        file_path = os.path.join('project', 'assets', 'sprites', __filename__)
+        file_path = os.path.join(constants.ASSETS_DIR, 'sprites', __filename__)
         sprite = pygame.image.load(file_path).convert_alpha()
         sprite.set_colorkey((0, 0, 0))
         return sprite

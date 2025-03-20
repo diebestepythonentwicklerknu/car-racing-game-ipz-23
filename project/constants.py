@@ -25,3 +25,10 @@ FRAME_FACTOR = 5
 MOUNTAIN_PARALLAX_FACTOR = 0.3
 FRAME_STEP_SLOW = 0.5
 FRAME_STEP = 1
+
+# DIRS
+
+import os
+
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.join(PROJECT_DIR, "assets")
