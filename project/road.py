@@ -1,7 +1,9 @@
 import random
 
 import pygame
+
 import constants
+
 
 class Road:
 
@@ -33,23 +35,23 @@ class Road:
         """Розраховує точку на квадратичній кривій Безьє."""
         return ((1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
                 (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],)
-    
-    
 
     @staticmethod
-    def calculate_control_points(turn_name, camera_offset_x = 0):
+    def calculate_control_points(turn_name, camera_offset_x=0):
         """
         Returns the control points for the given type of turn, adjusted for camera offset.
         """
+
         def calculate_turn(k, y, start_point, phi=0, divider=100, angle=1.9):
-            return (phi * y**2)/divider + k * start_point - k * y * angle
-    
-        def get_curve_points(k, start_point, camera_offset_x = 0, phi=0, step=100):
+            return (phi * y ** 2) / divider + k * start_point - k * y * angle
+
+        def get_curve_points(k, start_point, camera_offset_x=0, phi=0, step=100):
             points = []
             for y in range(0, constants.ROAD_HORIZON_Y + step, step):
-                points.append((calculate_turn(k, y, start_point +  k * camera_offset_x / step, phi), constants.SCREEN_HEIGHT - y))
+                points.append(
+                    (calculate_turn(k, y, start_point + k * camera_offset_x / step, phi), constants.SCREEN_HEIGHT - y))
             return points
-    
+
         control_points = {
             "hard_left": {
                 "left": get_curve_points(-1, 0, camera_offset_x, -0.5),
@@ -109,6 +111,7 @@ class Road:
             lane_edges.append(lane_edges[-1] + road_width * (ratio / total_ratio))
 
         return lane_edges, left_edge[1]
+
     @staticmethod
     def interpolate_points(p1, p2, t, camera_offset_x):
         """
@@ -171,58 +174,57 @@ class Road:
 
         for i in range(num_segments):
             pygame.draw.polygon(screen, self.__road_color, [left_curve[i],
-                                                          left_curve[i + 1],
-                                                          right_curve[i + 1],
-                                                          right_curve[i],
-                                                          ], )
+                                                            left_curve[i + 1],
+                                                            right_curve[i + 1],
+                                                            right_curve[i],
+                                                            ], )
 
         # Draw dividing lines for lanes
         for i in range(num_segments):
             pygame.draw.line(screen, self.__lane_mark_color, central_curve_left[i], central_curve_left[i + 1], 2)
             pygame.draw.line(screen, self.__lane_mark_color, central_curve_right[i], central_curve_right[i + 1], 2)
 
-
 # BACK UP
 
-        # control_points = {
-        #     "hard_left": {
-        #         "left": [(0 + camera_offset_x * 0.175, 600),
-        #                  (((0 + camera_offset_x * 0.175) + (0 - camera_offset_x * 0.75)) + 300, 500), # 300
-        #                  (0 - camera_offset_x * 0.75, 400)],
-        #         "right": [(800 + camera_offset_x * 0.175, 600),
-        #                   (((800 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.75))*60/95, 400), # 600
-        #                   (150 - camera_offset_x * 0.75, 400)],
-        #     },
-        #     "long_left": {
-        #         "left": [(-50 + camera_offset_x * 0.125, 600),
-        #                  (((50 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.5)) * 1.5, 500), # 300
-        #                  (220 - camera_offset_x * 0.65, 400)],
-        #         "right": [(800 + camera_offset_x * 0.125, 600),
-        #                   (500 - camera_offset_x * 0.462, 400), # 500
-        #                   (300 - camera_offset_x * 0.65, 400)],
-        #     },
-        #     "long_right": {
-        #         "left": [(0 + camera_offset_x * 0.175, 600),
-        #                  (((0 + camera_offset_x * 0.175) + (500 - camera_offset_x * 0.75)) * 3/5, 400), # 300
-        #                  (480 - camera_offset_x * 0.65, 400)],
-        #         "right": [(800 + camera_offset_x * 0.125, 600),
-        #                   (((800 + camera_offset_x * 0.175) + (610 - camera_offset_x * 1.5)) * 50/125, 500), # 500
-        #                   (610 - camera_offset_x * 0.65, 400)],
-        #     },
-        #     "hard_right": {
-        #         "left": [(0 + camera_offset_x * 0.175, 600),
-        #                  (((0 + camera_offset_x * 0.175) + (650 - camera_offset_x * 0.75))*4/13, 400), # 200
-        #                  (650 - camera_offset_x * 0.7, 400)],
-        #         "right": [(800 + camera_offset_x * 0.175, 600),
-        #                   (((800 + camera_offset_x * 0.175) + (800 - camera_offset_x * 1.5)) / 3, 500), # 500
-        #                   (800 - camera_offset_x * 0.7, 400)],
-        #     },
-        #     "straight": {
-        #         "left": [(0 + camera_offset_x * 0.175, 600),
-        #                  (((0 + camera_offset_x * 0.175) + (375 - camera_offset_x * 0.75)) / 2, 500),
-        #                  (375 - camera_offset_x * 0.75, 400)],
-        #         "right": [(800 + camera_offset_x * 0.175, 600),
-        #                   (((800 + camera_offset_x * 0.175) + (425 - camera_offset_x * 0.75)) / 2, 500),
-        #                   (425 - camera_offset_x * 0.75, 400)],
-        #     },
-        # }
+# control_points = {
+#     "hard_left": {
+#         "left": [(0 + camera_offset_x * 0.175, 600),
+#                  (((0 + camera_offset_x * 0.175) + (0 - camera_offset_x * 0.75)) + 300, 500), # 300
+#                  (0 - camera_offset_x * 0.75, 400)],
+#         "right": [(800 + camera_offset_x * 0.175, 600),
+#                   (((800 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.75))*60/95, 400), # 600
+#                   (150 - camera_offset_x * 0.75, 400)],
+#     },
+#     "long_left": {
+#         "left": [(-50 + camera_offset_x * 0.125, 600),
+#                  (((50 + camera_offset_x * 0.175) + (150 - camera_offset_x * 0.5)) * 1.5, 500), # 300
+#                  (220 - camera_offset_x * 0.65, 400)],
+#         "right": [(800 + camera_offset_x * 0.125, 600),
+#                   (500 - camera_offset_x * 0.462, 400), # 500
+#                   (300 - camera_offset_x * 0.65, 400)],
+#     },
+#     "long_right": {
+#         "left": [(0 + camera_offset_x * 0.175, 600),
+#                  (((0 + camera_offset_x * 0.175) + (500 - camera_offset_x * 0.75)) * 3/5, 400), # 300
+#                  (480 - camera_offset_x * 0.65, 400)],
+#         "right": [(800 + camera_offset_x * 0.125, 600),
+#                   (((800 + camera_offset_x * 0.175) + (610 - camera_offset_x * 1.5)) * 50/125, 500), # 500
+#                   (610 - camera_offset_x * 0.65, 400)],
+#     },
+#     "hard_right": {
+#         "left": [(0 + camera_offset_x * 0.175, 600),
+#                  (((0 + camera_offset_x * 0.175) + (650 - camera_offset_x * 0.75))*4/13, 400), # 200
+#                  (650 - camera_offset_x * 0.7, 400)],
+#         "right": [(800 + camera_offset_x * 0.175, 600),
+#                   (((800 + camera_offset_x * 0.175) + (800 - camera_offset_x * 1.5)) / 3, 500), # 500
+#                   (800 - camera_offset_x * 0.7, 400)],
+#     },
+#     "straight": {
+#         "left": [(0 + camera_offset_x * 0.175, 600),
+#                  (((0 + camera_offset_x * 0.175) + (375 - camera_offset_x * 0.75)) / 2, 500),
+#                  (375 - camera_offset_x * 0.75, 400)],
+#         "right": [(800 + camera_offset_x * 0.175, 600),
+#                   (((800 + camera_offset_x * 0.175) + (425 - camera_offset_x * 0.75)) / 2, 500),
+#                   (425 - camera_offset_x * 0.75, 400)],
+#     },
+# }

@@ -1,9 +1,10 @@
 import os
 import sys
+
 import pygame
 
-from camera import Camera
 import constants
+from camera import Camera
 from car import Ferrari458Italia
 from input_manager import InputManager
 from menu import Menu
@@ -13,16 +14,16 @@ from road import Road
 from score_manager import ScoreManager
 from scoreboard import ScoreBoard
 from utils.sprite_manager import SpriteManager
-from pygame import mixer
 
 print("PYTHONPATH:", sys.path)
 print("Current Directory:", os.getcwd())
-      
+
+
 class Game:
     """
     Game class is responsible for managing the game components
     """
-    
+
     def __init__(self, nickname=None):
         """
         Initializes the game

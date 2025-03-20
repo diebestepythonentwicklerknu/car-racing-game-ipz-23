@@ -1,10 +1,12 @@
-import sys
 import os
+import sys
+
 import pygame
+
 import constants
 from scoreboard import ScoreBoard
-from utils.sprite_manager import SpriteManager
 from tutorial import Tutorial
+from utils.sprite_manager import SpriteManager
 
 '''
 Menu class renders and handles the main menu
@@ -21,23 +23,24 @@ class Menu:
         self.nickname: str = ""
         pygame.display.set_caption("Menu")
         self.__background = SpriteManager.load_image("main_menu.png")
-        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
+        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"),
+                                       16)
 
         button_position = (constants.SCREEN_WIDTH - constants.BUTTON_WIDTH) // 2
         tutorial_position = (constants.SCREEN_WIDTH - constants.BUTTON_WIDTH) // 0.75
         self.__buttons = [{"text": "Play as Guest", "action": "guest",
-                         "rect": pygame.Rect(button_position, 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
-                        {"text": "Login", "action": "nickname",
-                         "rect": pygame.Rect(button_position, 360, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)} ,
-                        {"text": "ScoreBoard", "action": "scoreboard",
-                         "rect": pygame.Rect(button_position, 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)} ,
-                        {"text": "Quit", "action": "quit",
-                         "rect": pygame.Rect(button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
-                        {"text": "?", "action": "tutorial",
-                         "rect": pygame.Rect(tutorial_position, 20, constants.T_SQUARE_BUTTON_SIZE, constants.T_SQUARE_BUTTON_SIZE)}]
+                           "rect": pygame.Rect(button_position, 300, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                          {"text": "Login", "action": "nickname",
+                           "rect": pygame.Rect(button_position, 360, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                          {"text": "ScoreBoard", "action": "scoreboard",
+                           "rect": pygame.Rect(button_position, 420, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                          {"text": "Quit", "action": "quit",
+                           "rect": pygame.Rect(button_position, 480, constants.BUTTON_WIDTH, constants.BUTTON_HEIGHT)},
+                          {"text": "?", "action": "tutorial",
+                           "rect": pygame.Rect(tutorial_position, 20, constants.T_SQUARE_BUTTON_SIZE,
+                                               constants.T_SQUARE_BUTTON_SIZE)}]
 
-
-        # constants for music (probably should be in different place)
+        # Constants for music (probably should be in different place)
         self.volume = 0.05
         self.slider_rect = pygame.Rect(60, constants.SCREEN_HEIGHT - 48, 100, 6)
         self.slider_handle_radius = 8
@@ -63,7 +66,7 @@ class Menu:
             self.__screen.blit(text, (text_x, text_y))
 
         # Draw sound icon
-        self.sound_icon = pygame.image.load(os.path.join("project", "assets", "sprites", "sound_icon.png"))
+        self.sound_icon = pygame.image.load(os.path.join("assets", "sprites", "sound_icon.png"))
         self.sound_icon = pygame.transform.scale(self.sound_icon, (30, 30))
         self.__screen.blit(self.sound_icon, (self.slider_rect.x - 45, self.slider_rect.y - 13))
 
@@ -173,7 +176,6 @@ class Menu:
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if back_button.collidepoint(event.pos):
                         return
-                    
 
     def run(self):
         """
@@ -188,5 +190,3 @@ class Menu:
 
             self.render()
             pygame.display.flip()
-    
-

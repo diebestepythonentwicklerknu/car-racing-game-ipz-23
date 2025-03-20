@@ -2,6 +2,8 @@ import os
 
 import pygame
 
+from constants import ASSETS_DIR
+
 
 class ScoreManager:
     """
@@ -16,10 +18,10 @@ class ScoreManager:
         """
         self.score = 0.0
         self.best_score = 0
-        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 20)
+        self.__font = pygame.font.Font(
+            os.path.join(ASSETS_DIR, "PressStart2P-Regular.ttf"), 20)
         self.__color = (255, 255, 255)
 
-        
         self._load_best_score()
 
     def _load_best_score(self):

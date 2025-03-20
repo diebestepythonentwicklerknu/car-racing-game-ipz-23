@@ -39,7 +39,9 @@ class Obstacle:
         return self.__compute_rect(road, scale_factor=0.8, camera_offset_x=camera_offset_x)
 
     def get_increased_rect(self, road, camera_offset_x):
-        return self.__compute_rect(road, scale_factor=1.4, camera_offset_x=camera_offset_x)  # Fix: made a  size of the bigger hitbox a lil bit smaller
+        return self.__compute_rect(road, scale_factor=1.4,
+                                   camera_offset_x=camera_offset_x)
+        # Fix: made a size of the bigger hitbox a lil bit smaller
 
     def render(self, screen, road, camera_offset_x):
         """

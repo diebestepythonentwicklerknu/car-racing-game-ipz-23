@@ -1,6 +1,9 @@
 import os
+
 import pygame
+
 import constants
+
 
 class Tutorial:
     def __init__(self, screen):
@@ -8,7 +11,8 @@ class Tutorial:
         Initializes the tutorial screen.
         """
         self.__screen = screen
-        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 18)
+        self.__font = pygame.font.Font(
+            os.path.join(constants.ASSETS_DIR, "PressStart2P-Regular.ttf"), 18)
         self.__back_button = pygame.Rect(constants.SCREEN_WIDTH // 2 - 100, 500, 200, 50)
 
         self.__tutorial_text = [
@@ -21,7 +25,6 @@ class Tutorial:
             "Space : Pause",
             "Mouse click : Interact"
         ]
-
 
     def show(self):
         """
@@ -36,7 +39,10 @@ class Tutorial:
             y_offset = 150
             for line in self.__tutorial_text:
                 text = self.__font.render(line, True, (255, 255, 0))
-                self.__screen.blit(text, (constants.SCREEN_WIDTH // 2 - text.get_width() // 2, y_offset))
+                self.__screen.blit(
+                    text,
+                    (constants.SCREEN_WIDTH // 2 - text.get_width() // 2,
+                     y_offset))
                 y_offset += 40
 
             pygame.draw.rect(self.__screen, (255, 0, 0), self.__back_button)
@@ -52,4 +58,3 @@ class Tutorial:
                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.__back_button.collidepoint(event.pos):
                         return  # Exit tutorial and go back to menu
-    

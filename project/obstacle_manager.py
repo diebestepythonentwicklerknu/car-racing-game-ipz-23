@@ -1,7 +1,9 @@
 import os
 import random
 import time
+
 import pygame
+
 from obstacle import Obstacle
 
 '''
@@ -34,7 +36,8 @@ class ObstacleManager:
             # If player goes over 100 kph and near obstacle + 100 to current score
             # Uses wider hitbox
             if obstacle not in self.__near_obstacles:
-                if obstacle.get_increased_rect(road, camera_offset_x).colliderect(player.get_rect()) and car_speed > 100:
+                if obstacle.get_increased_rect(road, camera_offset_x).colliderect(
+                        player.get_rect()) and car_speed > 100:
                     self.__near_obstacles.add(obstacle)
                     score_manager.add_score(100)
 

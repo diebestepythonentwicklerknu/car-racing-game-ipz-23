@@ -21,4 +21,4 @@ jobs:
         run: pip install flake8
 
       - name: Run Flake8
-        run: flake8 project/
+        run: flake8 project/ --max-line-length=120
