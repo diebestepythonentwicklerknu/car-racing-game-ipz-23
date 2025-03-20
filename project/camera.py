@@ -1,6 +1,4 @@
-import pygame
-
-from constants import *
+from project.constants import SCREEN_WIDTH
 
 
 class Camera:
@@ -18,7 +16,6 @@ class Camera:
             self.camera_offset_x = car.road_offset_x + SCREEN_WIDTH // 2
             car.x = SCREEN_WIDTH // 2
 
-
     def switch_mode(self, car):
         if self.mode == "road":
             car.road_offset_x = -car.x
@@ -26,7 +23,7 @@ class Camera:
         else:
             car.x = -car.road_offset_x
             self.mode = "road"
-    
+
         def get_position(self):
             """Returns the current camera position."""
             return self.camera_offset_x, 0

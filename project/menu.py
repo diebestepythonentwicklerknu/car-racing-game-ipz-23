@@ -1,10 +1,12 @@
-import sys
 import os
+import sys
+
 import pygame
+
 import constants
 from scoreboard import ScoreBoard
-from utils.sprite_manager import SpriteManager
 from tutorial import Tutorial
+from utils.sprite_manager import SpriteManager
 
 '''
 Menu class renders and handles the main menu

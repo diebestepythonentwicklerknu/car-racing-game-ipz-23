@@ -1,4 +1,5 @@
 import pygame
+
 import constants
 
 
@@ -12,9 +13,9 @@ class InputManager:
         Initializes the input manager components
         """
         self.__actions = {pygame.K_LEFT: 'left',
-                        pygame.K_RIGHT: 'right',
-                        pygame.K_UP: 'accelerate',
-                        pygame.K_DOWN: 'brake', }
+                          pygame.K_RIGHT: 'right',
+                          pygame.K_UP: 'accelerate',
+                          pygame.K_DOWN: 'brake', }
         self.__pressed_keys = set()
         self.__unpressed_keys = set()
         self.__pause_key_pressed: bool = False
@@ -43,7 +44,6 @@ class InputManager:
             self.__pause_key_handled = True  # Space is pressed
             return True
         return False
-
 
     # @staticmethod
     def handle_pause(func):

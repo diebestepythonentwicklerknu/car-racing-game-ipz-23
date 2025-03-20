@@ -1,12 +1,11 @@
 import os
 
 import pygame
+from pygame import mixer
 
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from game import Game
 from menu import Menu
-from pygame import mixer
-
 
 '''
 Entry point of the game

@@ -15,11 +15,11 @@ class Tree:
         self.__sprites = tree_sprites
         self.__current_sprite = tree_sprites[0]
         self.__side = side
-        self.__base_y = ROAD_HORIZON_Y  
-        self.__max_height = tree_sprites[0].get_height() * 3  
-        self.__max_width = tree_sprites[0].get_width() * 3  
-        self.__min_height = MIN_TREE_HEIGHT  
-        self.__min_width = MIN_TREE_WIDTH  
+        self.__base_y = ROAD_HORIZON_Y
+        self.__max_height = tree_sprites[0].get_height() * 3
+        self.__max_width = tree_sprites[0].get_width() * 3
+        self.__min_height = MIN_TREE_HEIGHT
+        self.__min_width = MIN_TREE_WIDTH
         self.depth = depth  # The closer to the player (1) the bigger the size
         self.__offset = offset
 

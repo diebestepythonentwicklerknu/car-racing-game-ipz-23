@@ -13,7 +13,9 @@ class Car:
     Player car class
     """
 
-    def __init__(self, sprites, max_speed, mass, max_power, drag_coefficient, frontal_area, wheelbase):
+    def __init__(self, sprites, max_speed,
+                 mass, max_power, drag_coefficient,
+                 frontal_area, wheelbase):
         self.is_turning_left: bool = False
         self.is_turning_right: bool = False
         self.is_stopping: bool = False
@@ -32,7 +34,8 @@ class Car:
         self.max_offset: int = 245
         self.road_center: int = constants.CAR_POSITION[0]
         self.road_offset_x: int = 0
-        self.__font = pygame.font.Font(os.path.join(os.path.dirname(__file__), "assets", "PressStart2P-Regular.ttf"), 16)
+        self.__font = pygame.font.Font(
+            os.path.join(constants.ASSETS_DIR, "PressStart2P-Regular.ttf"), 16)
         self.camera = Camera()
 
         # Car characteristics
@@ -184,7 +187,10 @@ class Car:
         """
         Returns car's hitbox
         """
-        return pygame.Rect(self.x - self.__width // 2, self.y + self.__height // 2, self.__width, self.__height)
+        return pygame.Rect(
+            self.x - self.__width // 2,
+            self.y + self.__height // 2,
+            self.__width, self.__height)
 
     def apply_road_force(self, road, delta_time):
         """
@@ -210,7 +216,9 @@ class Car:
 
         # Limit the car's position to the road's width
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
-        self.road_offset_x = min(-(self.road_center - self.max_offset), max(self.road_offset_x, -(self.road_center + self.max_offset)))
+        self.road_offset_x = \
+            min(-(self.road_center - self.max_offset),
+                max(self.road_offset_x, -(self.road_center + self.max_offset)))
 
     def _update_speed(self):
         """
@@ -218,7 +226,9 @@ class Car:
         """
         if self.speed > 0 or self.throttle > 0:
             # Drag force calculation based on diffrerent factors
-            drag_force = 0.5 * self.__drag_coefficient * self.__air_density * self.__frontal_area * (self.speed / 3.6) ** 2
+            drag_force = (0.5 * self.__drag_coefficient *
+                          self.__air_density * self.__frontal_area * (
+                                  self.speed / 3.6) ** 2)
 
             # Limit the drag force to the car's power
             max_force = ((self.__max_power * self.throttle)
@@ -251,7 +261,9 @@ class Car:
             self.road_offset_x -= (angular_velocity * radius * math.sin(math.radians(self.__steering_angle)))
 
         self.x = max(self.road_center - self.max_offset, min(self.x, self.road_center + self.max_offset))
-        self.road_offset_x = min(-(self.road_center - self.max_offset), max(self.road_offset_x, -(self.road_center + self.max_offset)))
+        self.road_offset_x = min(-(self.road_center - self.max_offset),
+                                 max(self.road_offset_x, -(self.road_center + self.max_offset)))
+
 
 class Ferrari458Italia(Car):
     def __init__(self):
