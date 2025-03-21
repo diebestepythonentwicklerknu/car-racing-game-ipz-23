@@ -25,6 +25,10 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1024x768x24 &
           sleep 3  # wait for XVFB to initialize
+          
+      - name: Set PYTHONPATH for tests
+        run: echo "PYTHONPATH=$(pwd)/project" >> $GITHUB_ENV
+        
       - name: Run tests
         run: pytest test/car_test.py
         env:
