@@ -29,4 +29,6 @@ jobs:
       - name: Run tests
         run: pytest test/car_test.py
         env:
+          PYTHONPATH: "${{ github.workspace }}";
+          PROJECT_PATH: "${{ github.workspace }}/project";
           DISPLAY: :99.0
