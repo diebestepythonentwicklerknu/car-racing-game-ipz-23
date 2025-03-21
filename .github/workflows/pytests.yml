@@ -23,7 +23,7 @@ jobs:
           pip install pytest pygame
       - name: Setup XVFB
         run: |
-          Xvfb :99 -screen 0 1024x768x24 &;
+          Xvfb :99 -screen 0 1024x768x24 &
           sleep 3  # wait for XVFB to initialize
       - name: Run tests
         run: pytest test/car_test.py
