@@ -4,7 +4,7 @@ import sys
 import pygame
 import pytest
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'project')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../project')))
 print("PYTHONPATH:", sys.path)
 from project.car import Ferrari458Italia
 from project.obstacle import Obstacle

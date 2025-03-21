@@ -26,10 +26,9 @@ jobs:
           Xvfb :99 -screen 0 1024x768x24 &
           sleep 3  # wait for XVFB to initialize
           
-      - name: Set working directory and run tests
+      - name: Set PYTHONPATH and run tests
         run: |
-          cd $GITHUB_WORKSPACE;  # Перехід у кореневу директорію репозиторію
-          pytest test/car_test.py
+          PYTHONPATH=$(pwd)/project pytest test/car_test.py
         
       - name: Run tests
         run: pytest test/car_test.py
