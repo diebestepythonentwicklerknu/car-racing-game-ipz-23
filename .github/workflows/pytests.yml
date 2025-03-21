@@ -31,5 +31,5 @@ jobs:
           cd /home/runner/work/car-racing-game-ipz-23;       
           pytest test/car_test.py
         env:
-          PYTHONPATH: "${{ github.workspace }}"
+          PYTHONPATH: "/home/runner/work/car-racing-game-ipz-23"
           DISPLAY: :99.0
