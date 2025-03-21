@@ -27,7 +27,9 @@ jobs:
           sleep 3  # wait for XVFB to initialize
         
       - name: Run tests
-        run: pytest test/car_test.py
+        run: |
+          cd /home/runner/work/car-racing-game-ipz-23;       
+          pytest test/car_test.py
         env:
           PYTHONPATH: "${{ github.workspace }}"
           DISPLAY: :99.0
