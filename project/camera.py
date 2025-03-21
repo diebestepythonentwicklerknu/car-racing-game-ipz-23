@@ -4,15 +4,13 @@ from project.constants import SCREEN_WIDTH
 class Camera:
     def __init__(self):
         self.camera_offset_x = 0
-        self.mode = "road"  # Початковий режим камери
+        self.mode = "road"
 
     def update(self, car):
         if self.mode == "road":
-            # Камера залишається в центрі дороги
             self.camera_offset_x = 0
 
         elif self.mode == "car":
-            # Камера слідкує за автомобілем
             self.camera_offset_x = car.road_offset_x + SCREEN_WIDTH // 2
             car.x = SCREEN_WIDTH // 2
 
