@@ -9,6 +9,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      - name: Debug directory structure
+        run: |
+          echo "Current directory: $(pwd)";
+          echo "Workspace: ${{ github.workspace }}";
+          ls -R
+        
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -29,5 +36,4 @@ jobs:
       - name: Run tests
         run: pytest test/car_test.py
         env:
-          PYTHONPATH: ${{ github.workspace }}/project;
           DISPLAY: :99.0
