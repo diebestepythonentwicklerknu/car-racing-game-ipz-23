@@ -25,12 +25,9 @@ jobs:
         run: |
           Xvfb :99 -screen 0 1024x768x24 &
           sleep 3  # wait for XVFB to initialize
-          
-      - name: Set PYTHONPATH and run tests
-        run: |
-          PYTHONPATH=$(pwd)/project pytest test/car_test.py
         
       - name: Run tests
         run: pytest test/car_test.py
         env:
+          PYTHONPATH: ${{ github.workspace }}/project;
           DISPLAY: :99.0
